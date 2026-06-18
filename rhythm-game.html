@@ -106,12 +106,12 @@
   /* overlays */
   .overlay{
     position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:18px;text-align:center;
-    background:var(--panelb);backdrop-filter:blur(4px);padding:30px;
+    align-items:center;justify-content:center;gap:14px;text-align:center;
+    background:var(--panelb);backdrop-filter:blur(4px);padding:26px;overflow:auto;
   }
   .overlay.hidden{display:none;}
   h1{font-size:34px;margin:0;font-weight:800;letter-spacing:-.01em;}
-  .sub{color:var(--muted);font-size:14px;line-height:1.6;max-width:300px;margin-top:-6px;}
+  .sub{color:var(--muted);font-size:13px;line-height:1.6;max-width:300px;margin-top:-4px;}
   button{
     font:inherit;font-weight:700;font-size:17px;color:#fff;border:none;cursor:pointer;
     padding:14px 34px;border-radius:999px;
@@ -120,10 +120,20 @@
   }
   button:active{transform:translateY(2px);box-shadow:0 4px 12px rgba(150,130,220,.3);}
   .ghost{background:none;color:var(--muted);box-shadow:none;padding:8px;font-size:14px;}
-  .diffrow{display:flex;gap:8px;}
-  .diff{padding:9px 18px;border-radius:999px;font-size:14px;font-weight:700;color:var(--muted);
-    background:rgba(255,255,255,.6);border:1px solid rgba(180,160,220,.3);cursor:pointer;}
+  .field{display:flex;flex-direction:column;align-items:center;gap:7px;}
+  .fieldlabel{font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;}
+  .diffrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:320px;}
+  .diff{padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);
+    background:rgba(255,255,255,.6);border:1px solid rgba(180,160,220,.3);cursor:pointer;white-space:nowrap;}
   .diff.sel{color:#fff;background:linear-gradient(135deg,#c4a7f5,#a7c8f5);border-color:transparent;}
+  .lay{padding:8px 14px;border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);
+    background:rgba(255,255,255,.6);border:1px solid rgba(180,160,220,.3);cursor:pointer;letter-spacing:.08em;}
+  .lay.sel{color:#fff;background:linear-gradient(135deg,#a7c8f5,#9fd6c4);border-color:transparent;}
+  .kbrow{display:flex;align-items:center;gap:10px;}
+  .toggle{font-size:13px;font-weight:800;padding:7px 16px;border-radius:999px;cursor:pointer;border:none;
+    color:#fff;box-shadow:none;letter-spacing:.1em;}
+  .toggle.on{background:linear-gradient(135deg,#9fd6c4,#a7c8f5);}
+  .toggle.off{background:#cfc8da;}
   .res{display:flex;flex-direction:column;gap:6px;font-size:15px;}
   .res .big{font-size:60px;font-weight:800;line-height:1;}
   .rrow{display:flex;justify-content:space-between;width:200px;}
@@ -159,13 +169,33 @@
   <!-- start -->
   <div class="overlay" id="startScreen">
     <h1>리듬베르</h1>
-    <div class="legend" style="margin-top:-10px">Rhythm-Camembert</div>
-    <p class="sub">노트가 판정선에 닿는 순간 맞춰 누르세요.<br>PC: <b>D F J K</b> · 모바일: 하단 패드 <b>탭</b></p>
-    <div class="diffrow" id="diffRow">
-      <div class="diff" data-d="easy">EASY</div>
-      <div class="diff sel" data-d="normal">NORMAL</div>
-      <div class="diff" data-d="hard">HARD</div>
+    <div class="legend" style="margin-top:-8px">Rhythm-Camembert</div>
+    <p class="sub" id="howto">노트가 판정선에 닿는 순간 맞춰 누르세요.</p>
+
+    <div class="field">
+      <div class="fieldlabel">난이도</div>
+      <div class="diffrow" id="diffRow">
+        <div class="diff" data-d="1">Lv.1 EASY</div>
+        <div class="diff sel" data-d="2">Lv.2 NORMAL</div>
+        <div class="diff" data-d="3">Lv.3 HARD</div>
+        <div class="diff" data-d="4">Lv.4 EXPERT</div>
+        <div class="diff" data-d="5">Lv.5 MASTER</div>
+      </div>
     </div>
+
+    <div class="field" id="kbField">
+      <div class="kbrow">
+        <span class="fieldlabel" style="letter-spacing:.1em">키보드</span>
+        <button class="toggle on" id="keyToggle">ON</button>
+      </div>
+      <div class="diffrow" id="layoutRow">
+        <div class="lay sel" data-p="dfjk">D F J K</div>
+        <div class="lay" data-p="asdf">A S D F</div>
+        <div class="lay" data-p="wasd">W A S D</div>
+        <div class="lay" data-p="jkl">J K L ;</div>
+      </div>
+    </div>
+
     <button id="startBtn">시작하기</button>
     <div class="legend">소리가 켜져 있는지 확인하세요 🔊</div>
   </div>
@@ -196,16 +226,45 @@ const lanesEl = [0,1,2,3].map(i => document.querySelector(`.lane[data-l="${i}"]`
 const padsEl  = [0,1,2,3].map(i => document.querySelector(`.pad[data-l="${i}"]`));
 const glowEl  = [0,1,2,3].map(i => lanesEl[i].querySelector('.glow'));
 
-const KEYMAP = {KeyD:0, KeyF:1, KeyJ:2, KeyK:3};
+const isMobile = window.matchMedia('(pointer:coarse)').matches || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
 const BPM = 100;
 const SPB = 60/BPM;              // seconds per beat
-const APPROACH = 1.6;            // seconds a note is visible before hitline
 const HIT_PERFECT = 0.07;        // |dt| windows (s)
 const HIT_GOOD    = 0.14;
-const HIT_MISS    = 0.20;        // beyond -> miss when passed
+const HIT_MISS    = 0.20;
 
-let diff = 'normal';
-const DENSITY = {easy:0.55, normal:0.8, hard:1.0};
+/* ---------- difficulty (5 levels) ---------- */
+const DIFFS = {
+  1:{name:'Lv.1 EASY',   dens:0.45, eighth:0.00, six:0.00, chord:0.00, approach:1.90},
+  2:{name:'Lv.2 NORMAL', dens:0.75, eighth:0.12, six:0.00, chord:0.00, approach:1.60},
+  3:{name:'Lv.3 HARD',   dens:0.95, eighth:0.42, six:0.06, chord:0.06, approach:1.40},
+  4:{name:'Lv.4 EXPERT', dens:1.00, eighth:0.72, six:0.28, chord:0.16, approach:1.18},
+  5:{name:'Lv.5 MASTER', dens:1.00, eighth:0.96, six:0.62, chord:0.24, approach:1.00},
+};
+let level = 2;
+let approach = DIFFS[level].approach;
+
+/* ---------- key presets ---------- */
+const KEY_PRESETS = {
+  dfjk:{keys:['KeyD','KeyF','KeyJ','KeyK'],     disp:['D','F','J','K']},
+  asdf:{keys:['KeyA','KeyS','KeyD','KeyF'],     disp:['A','S','D','F']},
+  wasd:{keys:['KeyW','KeyA','KeyS','KeyD'],     disp:['W','A','S','D']},
+  jkl :{keys:['KeyJ','KeyK','KeyL','Semicolon'],disp:['J','K','L',';']},
+};
+let preset = 'dfjk';
+let keyboardOn = !isMobile;
+let keyToLane = {};
+function applyPreset(){
+  keyToLane = {};
+  KEY_PRESETS[preset].keys.forEach((k,i)=>keyToLane[k]=i);
+  updatePadLabels();
+}
+function updatePadLabels(){
+  const show = keyboardOn && !isMobile;
+  const disp = KEY_PRESETS[preset].disp;
+  padsEl.forEach((p,i)=> p.textContent = show ? disp[i] : '');
+}
 
 /* ---------- Web Audio synth ---------- */
 let ac, master;
@@ -249,47 +308,55 @@ function hitSound(good){
 }
 
 /* ---------- Song / chart ---------- */
-const SC = {C4:261.63,D4:293.66,E4:329.63,G4:392.0,A4:440.0,C5:523.25,D5:587.33,E5:659.25,G5:783.99};
+const SC = {C4:261.63,D4:293.66,E4:329.63,G4:392.0,A4:440.0,C5:523.25,D5:587.33,E5:659.25};
 const NOTES = [SC.C4,SC.D4,SC.E4,SC.G4,SC.A4,SC.C5,SC.D5,SC.E5];
 const MELODY = [0,2,4,5, 4,2,3,5, 6,5,4,2, 4,5,6,7,  5,4,2,0, 2,3,4,2, 0,2,4,6, 5,3,1,-1];
 
 let chart=[];
 let songLen=0;
+const BARS=8, TOTAL_BEATS=BARS*4;
+
 function buildChart(){
   chart=[];
-  const bars = 8;
-  const totalBeats = bars*4;
-  const dens = DENSITY[diff];
+  const cfg = DIFFS[level];
+  approach = cfg.approach;
   let lastLane=-1;
-  for(let b=0;b<totalBeats;b++){
-    const mi = MELODY[b % MELODY.length];
-    let place = mi>=0 && Math.random()<dens;
-    if(diff!=='easy' && Math.random()<dens*0.35) place=true;
-    if(b<2) place = b===1;
-    if(place){
-      let lane = Math.floor(Math.random()*4);
-      if(lane===lastLane) lane=(lane+1)%4;
-      lastLane=lane;
-      chart.push({t:b*SPB, lane, hit:false, missed:false, el:null});
-    }
-    if(diff==='hard' && mi>=0 && Math.random()<0.4){
-      let lane=Math.floor(Math.random()*4);
-      chart.push({t:(b+0.5)*SPB, lane, hit:false, missed:false, el:null});
+  const addNote=(beat,lane)=>{ chart.push({t:beat*SPB, lane, hit:false, missed:false, el:null}); };
+  const pick=()=>{
+    let l=Math.floor(Math.random()*4);
+    if(l===lastLane && level<5) l=(l+1)%4;
+    lastLane=l; return l;
+  };
+  const steps = TOTAL_BEATS*4;   // sixteenth-note grid
+  for(let s=0;s<steps;s++){
+    const beat=s/4;
+    if(beat<1){ if(s===2){ addNote(0.5, pick()); } continue; } // tiny lead-in
+    let p;
+    if(s%4===0) p=cfg.dens;        // on-beat
+    else if(s%2===0) p=cfg.eighth; // eighth
+    else p=cfg.six;                // sixteenth
+    if(Math.random()<p){
+      const lane=pick();
+      addNote(beat, lane);
+      if(Math.random()<cfg.chord){
+        let l2=(lane + 1 + Math.floor(Math.random()*3))%4;
+        addNote(beat, l2);
+      }
     }
   }
   chart.sort((a,b)=>a.t-b.t);
-  songLen = totalBeats*SPB;
+  songLen = TOTAL_BEATS*SPB;
 }
 
 /* ---------- Music scheduler ---------- */
-let startTime=0, schedIdx=0, beatSched=0;
+let startTime=0, beatSched=0;
 function scheduleMusic(now){
   const ahead = now - startTime + 0.4;
-  while(beatSched*0.5*SPB < ahead && beatSched < 8*4*2){
+  while(beatSched*0.5*SPB < ahead && beatSched < TOTAL_BEATS*2){
     const halfBeat = beatSched;
     const t = startTime + halfBeat*0.5*SPB;
     const beat = halfBeat/2;
-    if(beat < 8*4){
+    if(beat < TOTAL_BEATS){
       if(Number.isInteger(beat)){
         if(beat%2===0) kick(t);
         const mi=MELODY[beat%MELODY.length];
@@ -329,7 +396,7 @@ function start(){
   layout();
   running=true;
   startTime = ac.currentTime + 1.2;
-  schedIdx=0; beatSched=0;
+  beatSched=0;
   loop();
 }
 
@@ -347,14 +414,13 @@ function loop(){
   scheduleMusic(now);
 
   for(const n of chart){
-    if(!n.el && !n.hit && !n.missed && n.t - songT <= APPROACH && n.t - songT > -0.05){
+    if(!n.el && !n.hit && !n.missed && n.t - songT <= approach && n.t - songT > -0.05){
       spawnNote(n);
     }
     if(n.el && !n.hit){
       const dt = n.t - songT;
-      const prog = 1 - dt/APPROACH;
-      const y = prog*lineY;
-      n.el.style.transform = `translateY(${y}px)`;
+      const prog = 1 - dt/approach;
+      n.el.style.transform = `translateY(${prog*lineY}px)`;
       if(dt < -HIT_MISS && !n.missed){
         n.missed=true; registerMiss(); n.el.remove(); n.el=null;
       }
@@ -381,8 +447,7 @@ function hitLane(lane){
   if(best && bestAbs<=HIT_GOOD){
     best.hit=true;
     if(best.el){best.el.remove();best.el=null;}
-    if(bestAbs<=HIT_PERFECT){ registerHit('PERFECT'); }
-    else { registerHit('GOOD'); }
+    registerHit(bestAbs<=HIT_PERFECT ? 'PERFECT' : 'GOOD');
   }
 }
 
@@ -441,11 +506,12 @@ function pressUp(lane){
 
 /* ---------- key/touch bindings ---------- */
 document.addEventListener('keydown',e=>{
-  if(e.repeat) return;
-  if(e.code in KEYMAP){ e.preventDefault(); pressDown(KEYMAP[e.code]); }
+  if(!keyboardOn || e.repeat) return;
+  if(e.code in keyToLane){ e.preventDefault(); pressDown(keyToLane[e.code]); }
 });
 document.addEventListener('keyup',e=>{
-  if(e.code in KEYMAP){ e.preventDefault(); pressUp(KEYMAP[e.code]); }
+  if(!keyboardOn) return;
+  if(e.code in keyToLane){ e.preventDefault(); pressUp(keyToLane[e.code]); }
 });
 padsEl.forEach((p,i)=>{
   p.addEventListener('pointerdown',e=>{e.preventDefault(); pressDown(i);});
@@ -465,12 +531,11 @@ function end(){
   $('#rPerfect').textContent=cPerfect;
   $('#rGood').textContent=cGood;
   $('#rMiss').textContent=cMiss;
-  let rank='C';
+  let rank='D';
   if(acc>=0.97&&cMiss===0) rank='S';
   else if(acc>=0.9) rank='A';
   else if(acc>=0.8) rank='B';
   else if(acc>=0.6) rank='C';
-  else rank='D';
   $('#rRank').textContent=rank;
   $('#resultScreen').classList.remove('hidden');
 }
@@ -478,8 +543,22 @@ function end(){
 /* ---------- menu wiring ---------- */
 $('#diffRow').addEventListener('click',e=>{
   const d=e.target.closest('.diff'); if(!d) return;
-  diff=d.dataset.d;
+  level=parseInt(d.dataset.d,10);
   document.querySelectorAll('.diff').forEach(x=>x.classList.toggle('sel',x===d));
+});
+$('#layoutRow').addEventListener('click',e=>{
+  const l=e.target.closest('.lay'); if(!l) return;
+  preset=l.dataset.p; applyPreset();
+  document.querySelectorAll('.lay').forEach(x=>x.classList.toggle('sel',x===l));
+});
+$('#keyToggle').addEventListener('click',()=>{
+  keyboardOn=!keyboardOn;
+  const t=$('#keyToggle');
+  t.textContent=keyboardOn?'ON':'OFF';
+  t.classList.toggle('on',keyboardOn);
+  t.classList.toggle('off',!keyboardOn);
+  $('#layoutRow').style.display = keyboardOn ? 'flex' : 'none';
+  updatePadLabels();
 });
 $('#startBtn').addEventListener('click',start);
 $('#againBtn').addEventListener('click',start);
@@ -487,6 +566,19 @@ $('#menuBtn').addEventListener('click',()=>{
   $('#resultScreen').classList.add('hidden');
   $('#startScreen').classList.remove('hidden');
 });
+
+/* ---------- init ---------- */
+function initUI(){
+  if(isMobile){
+    keyboardOn=false;
+    $('#kbField').style.display='none';        // hide keyboard settings on mobile
+    $('#howto').innerHTML='노트가 판정선에 닿는 순간<br>하단 패드를 <b>탭</b>하세요.';
+  }else{
+    $('#howto').innerHTML='노트가 판정선에 닿는 순간 맞춰 누르세요.<br>키보드 또는 하단 패드 <b>탭</b>';
+  }
+  applyPreset();
+}
+initUI();
 </script>
 </body>
 </html>
