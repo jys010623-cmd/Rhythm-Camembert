@@ -9,8 +9,9 @@
     --bg1:#fdf4ff; --bg2:#eef2ff; --ink:#5b5570; --muted:#9b94b3;
     --line:#cdbcf0;
     --l0:#ffb3c6; --l1:#b6e3ff; --l2:#c3f0ca; --l3:#ffe0a3;
-    --perfect:#7ad0c0; --good:#9ab6f0; --miss:#f0a0b0;
-    --panel:rgba(255,255,255,.62); --panelb:rgba(255,255,255,.85);
+    --perfect:#7ad0c0; --great:#9ab6f0; --good:#c8b6e8; --miss:#f0a0b0;
+    --panel:rgba(255,255,255,.62); --panelb:rgba(255,255,255,.9);
+    --accent1:#c4a7f5; --accent2:#a7c8f5; --accent3:#9fd6c4;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;margin:0;}
@@ -32,7 +33,12 @@
     border-radius:28px;
     overflow:hidden;
     display:flex;flex-direction:column;
+    transition:box-shadow .12s ease-out;
   }
+  #stage.pulse{box-shadow:0 20px 60px rgba(150,120,220,.34);}
+  /* progress bar */
+  #progressWrap{position:absolute;top:0;left:0;right:0;height:4px;background:rgba(180,160,220,.18);z-index:6;}
+  #progressBar{height:100%;width:0;background:linear-gradient(90deg,var(--accent1),var(--accent3));transition:width .1s linear;}
   /* top hud */
   #hud{
     display:flex;justify-content:space-between;align-items:flex-start;
@@ -41,19 +47,39 @@
   .stat .k{font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
   .stat .v{font-size:24px;font-weight:700;line-height:1.1;}
   #accWrap{text-align:right;}
+  #pauseBtn{
+    position:absolute;top:14px;left:50%;transform:translateX(-50%);
+    width:34px;height:34px;padding:0;border-radius:50%;
+    font-size:13px;letter-spacing:2px;line-height:34px;
+    background:rgba(255,255,255,.55);color:var(--muted);
+    border:1px solid rgba(180,160,220,.35);box-shadow:none;display:none;
+  }
+  #pauseBtn.show{display:block;}
+  /* life bar */
+  #lifeWrap{margin:2px 22px 0;height:8px;border-radius:6px;background:rgba(180,160,220,.18);overflow:hidden;z-index:5;}
+  #lifeBar{height:100%;width:100%;border-radius:6px;
+    background:linear-gradient(90deg,#9fd6c4,#a7c8f5);transition:width .15s ease-out, background .3s;}
+  #lifeBar.low{background:linear-gradient(90deg,#f0a0b0,#ffb3c6);}
+  /* combo / judge */
   #combo{
-    position:absolute;top:34%;left:0;right:0;text-align:center;
+    position:absolute;top:30%;left:0;right:0;text-align:center;
     font-size:54px;font-weight:800;color:var(--ink);
     opacity:0;pointer-events:none;z-index:4;
     text-shadow:0 2px 10px rgba(160,140,220,.25);
   }
   #combo small{display:block;font-size:14px;font-weight:600;letter-spacing:.2em;color:var(--muted);}
   #judge{
-    position:absolute;top:46%;left:0;right:0;text-align:center;
+    position:absolute;top:44%;left:0;right:0;text-align:center;
     font-size:30px;font-weight:800;opacity:0;pointer-events:none;z-index:4;
   }
+  #judgeSub{
+    position:absolute;top:51%;left:0;right:0;text-align:center;
+    font-size:13px;font-weight:700;letter-spacing:.2em;opacity:0;pointer-events:none;z-index:4;color:var(--muted);
+  }
+  /* fx canvas */
+  #fx{position:absolute;left:0;top:0;pointer-events:none;z-index:4;}
   /* lanes */
-  #lanes{position:relative;flex:1;display:flex;margin:4px 14px 0;}
+  #lanes{position:relative;flex:1;display:flex;margin:6px 14px 0;}
   .lane{
     position:relative;flex:1;margin:0 3px;border-radius:14px 14px 0 0;
     background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.25));
@@ -61,14 +87,23 @@
   }
   .lane::before{content:"";position:absolute;inset:0;border-left:1px dashed rgba(180,160,220,.25);border-right:1px dashed rgba(180,160,220,.25);}
   .note{
-    position:absolute;left:6%;width:88%;height:26px;border-radius:9px;
+    position:absolute;left:6%;width:88%;height:24px;border-radius:9px;
     box-shadow:0 3px 0 rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.7);
-    will-change:transform;
+    will-change:transform,height;
   }
   .lane[data-l="0"] .note{background:var(--l0);}
   .lane[data-l="1"] .note{background:var(--l1);}
   .lane[data-l="2"] .note{background:var(--l2);}
   .lane[data-l="3"] .note{background:var(--l3);}
+  .note.hold{
+    border-radius:11px;opacity:.92;
+    box-shadow:0 0 0 1px rgba(255,255,255,.5) inset, 0 2px 8px rgba(120,100,180,.18);
+  }
+  .lane[data-l="0"] .note.hold{background:linear-gradient(to top,var(--l0),rgba(255,179,198,.35));}
+  .lane[data-l="1"] .note.hold{background:linear-gradient(to top,var(--l1),rgba(182,227,255,.35));}
+  .lane[data-l="2"] .note.hold{background:linear-gradient(to top,var(--l2),rgba(195,240,202,.35));}
+  .lane[data-l="3"] .note.hold{background:linear-gradient(to top,var(--l3),rgba(255,224,163,.35));}
+  .note.holding{filter:brightness(1.18) saturate(1.2);box-shadow:0 0 16px rgba(160,140,220,.5);}
   /* judgment line */
   #hitline{
     position:absolute;left:14px;right:14px;height:3px;border-radius:3px;
@@ -107,51 +142,113 @@
   .overlay{
     position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:14px;text-align:center;
-    background:var(--panelb);backdrop-filter:blur(4px);padding:26px;overflow:auto;
+    background:var(--panelb);backdrop-filter:blur(4px);padding:24px;overflow:auto;
   }
   .overlay.hidden{display:none;}
   h1{font-size:34px;margin:0;font-weight:800;letter-spacing:-.01em;}
+  h2{font-size:20px;margin:0 0 2px;font-weight:800;}
   .sub{color:var(--muted);font-size:13px;line-height:1.6;max-width:300px;margin-top:-4px;}
   button{
     font:inherit;font-weight:700;font-size:17px;color:#fff;border:none;cursor:pointer;
-    padding:14px 34px;border-radius:999px;
-    background:linear-gradient(135deg,#c4a7f5,#a7c8f5);
+    padding:13px 32px;border-radius:999px;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
     box-shadow:0 8px 22px rgba(150,130,220,.35);transition:transform .08s, box-shadow .2s;
   }
   button:active{transform:translateY(2px);box-shadow:0 4px 12px rgba(150,130,220,.3);}
   .ghost{background:none;color:var(--muted);box-shadow:none;padding:8px;font-size:14px;}
-  .field{display:flex;flex-direction:column;align-items:center;gap:7px;}
+  .secondary{background:linear-gradient(135deg,var(--accent2),var(--accent3));}
+  .field{display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;}
   .fieldlabel{font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;}
-  .diffrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:320px;}
+  .diffrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:330px;}
   .diff{padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);
     background:rgba(255,255,255,.6);border:1px solid rgba(180,160,220,.3);cursor:pointer;white-space:nowrap;}
-  .diff.sel{color:#fff;background:linear-gradient(135deg,#c4a7f5,#a7c8f5);border-color:transparent;}
+  .diff.sel{color:#fff;background:linear-gradient(135deg,var(--accent1),var(--accent2));border-color:transparent;}
   .lay{padding:8px 14px;border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);
     background:rgba(255,255,255,.6);border:1px solid rgba(180,160,220,.3);cursor:pointer;letter-spacing:.08em;}
-  .lay.sel{color:#fff;background:linear-gradient(135deg,#a7c8f5,#9fd6c4);border-color:transparent;}
-  .kbrow{display:flex;align-items:center;gap:10px;}
+  .lay.sel{color:#fff;background:linear-gradient(135deg,var(--accent2),var(--accent3));border-color:transparent;}
   .toggle{font-size:13px;font-weight:800;padding:7px 16px;border-radius:999px;cursor:pointer;border:none;
     color:#fff;box-shadow:none;letter-spacing:.1em;}
-  .toggle.on{background:linear-gradient(135deg,#9fd6c4,#a7c8f5);}
+  .toggle.on{background:linear-gradient(135deg,var(--accent3),var(--accent2));}
   .toggle.off{background:#cfc8da;}
-  .res{display:flex;flex-direction:column;gap:6px;font-size:15px;}
-  .res .big{font-size:60px;font-weight:800;line-height:1;}
-  .rrow{display:flex;justify-content:space-between;width:200px;}
+  .legend{font-size:12px;color:var(--muted);letter-spacing:.06em;line-height:1.5;}
+  /* song list */
+  #songList{display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;}
+  .songcard{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:18px;cursor:pointer;
+    background:rgba(255,255,255,.66);border:1px solid rgba(180,160,220,.3);
+    transition:transform .08s, box-shadow .15s, border-color .15s;text-align:left;}
+  .songcard:active{transform:scale(.98);}
+  .songcard.sel{border-color:var(--accent1);box-shadow:0 6px 18px rgba(150,130,220,.22);}
+  .songcard .ic{width:42px;height:42px;border-radius:13px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-size:20px;color:#fff;font-weight:800;}
+  .songcard .meta{flex:1;min-width:0;}
+  .songcard .t{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .songcard .d{font-size:11px;color:var(--muted);margin-top:2px;}
+  .songcard .best{font-size:11px;color:var(--muted);text-align:right;flex:none;line-height:1.4;}
+  .songcard .best b{display:block;font-size:17px;color:var(--ink);}
+  .songcard.upload{border-style:dashed;justify-content:center;color:var(--muted);font-weight:700;font-size:14px;}
+  /* settings rows */
+  .setrows{display:flex;flex-direction:column;gap:15px;width:100%;max-width:320px;}
+  .setrow{display:flex;flex-direction:column;gap:7px;}
+  .setrow .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;}
+  .setrow .top .val{color:var(--accent1);font-variant-numeric:tabular-nums;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;
+    background:rgba(180,160,220,.28);outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));cursor:pointer;box-shadow:0 2px 6px rgba(150,130,220,.4);}
+  input[type=range]::-moz-range-thumb{width:20px;height:20px;border:none;border-radius:50%;
+    background:var(--accent1);cursor:pointer;}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;}
+  /* result */
+  .res{display:flex;flex-direction:column;gap:6px;font-size:15px;align-items:center;}
+  .res .big{font-size:64px;font-weight:800;line-height:1;
+    background:linear-gradient(135deg,var(--accent1),var(--accent3));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .res .big.fail{background:linear-gradient(135deg,#f0a0b0,#e58aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .badge{font-size:12px;font-weight:800;letter-spacing:.18em;padding:5px 14px;border-radius:999px;color:#fff;
+    background:linear-gradient(135deg,var(--accent3),var(--accent2));}
+  .badge.ap{background:linear-gradient(135deg,#ffd27a,#ff9ec4);}
+  .newrec{font-size:12px;font-weight:800;letter-spacing:.16em;color:#e58aa0;animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.35;}}
+  .rrow{display:flex;justify-content:space-between;width:210px;font-size:14px;}
   .rrow span:first-child{color:var(--muted);}
-  .legend{font-size:12px;color:var(--muted);letter-spacing:.1em;}
+  .rrow .p{color:var(--perfect);} .rrow .gr{color:var(--great);} .rrow .gd{color:#a98fd6;} .rrow .ms{color:var(--miss);}
+  /* countdown */
+  #countdown{position:absolute;inset:0;z-index:9;display:none;align-items:center;justify-content:center;
+    font-size:96px;font-weight:800;color:var(--accent1);pointer-events:none;
+    text-shadow:0 4px 20px rgba(160,140,220,.35);}
+  #countdown.show{display:flex;}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .spin{width:30px;height:30px;border-radius:50%;border:3px solid rgba(180,160,220,.3);border-top-color:var(--accent1);
+    animation:rot .8s linear infinite;}
+  @keyframes rot{to{transform:rotate(360deg);}}
+  /* tutorial */
+  #stage.tutoring #hud,#stage.tutoring #lifeWrap,#stage.tutoring #progressWrap{visibility:hidden;}
+  #tutBanner{position:absolute;top:64px;left:16px;right:16px;z-index:8;display:none;
+    flex-direction:column;align-items:center;gap:9px;pointer-events:none;text-align:center;}
+  #tutBanner.show{display:flex;}
+  #tutBanner .pr{font-size:15px;font-weight:800;line-height:1.45;background:var(--panelb);
+    padding:11px 18px;border-radius:16px;box-shadow:0 8px 22px rgba(150,130,220,.2);max-width:300px;}
+  #tutBanner .ct{font-size:15px;font-weight:800;color:var(--accent1);letter-spacing:.05em;}
+  #tutBanner .sk{pointer-events:auto;}
+  #tutCard .em{font-size:46px;line-height:1;margin-bottom:2px;}
+  #tutCard h2{margin-top:2px;}
 </style>
 </head>
 <body>
 <div id="stage">
+  <div id="progressWrap"><div id="progressBar"></div></div>
   <div id="hud">
     <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
     <div class="stat" id="accWrap"><div class="k">Accuracy</div><div class="v" id="acc">100%</div></div>
   </div>
+  <button id="pauseBtn" title="일시정지 (Esc)">II</button>
+  <div id="lifeWrap"><div id="lifeBar"></div></div>
 
   <div id="combo"><span id="comboNum">0</span><small>COMBO</small></div>
   <div id="judge"></div>
+  <div id="judgeSub"></div>
 
   <div id="lanes">
+    <canvas id="fx"></canvas>
     <div class="lane" data-l="0"><div class="glow"></div></div>
     <div class="lane" data-l="1"><div class="glow"></div></div>
     <div class="lane" data-l="2"><div class="glow"></div></div>
@@ -166,12 +263,29 @@
     <div class="pad" data-l="3">K</div>
   </div>
 
-  <!-- start -->
-  <div class="overlay" id="startScreen">
-    <h1>리듬베르</h1>
-    <div class="legend" style="margin-top:-8px">Rhythm-Camembert</div>
-    <p class="sub" id="howto">노트가 판정선에 닿는 순간 맞춰 누르세요.</p>
+  <div id="countdown"></div>
 
+  <!-- tutorial practice banner -->
+  <div id="tutBanner">
+    <div class="pr" id="tutPrompt"></div>
+    <div class="ct" id="tutCount"></div>
+    <button class="ghost sk" id="tutSkip">건너뛰기 →</button>
+  </div>
+
+  <!-- menu -->
+  <div class="overlay" id="menuScreen">
+    <h1>리듬베르</h1>
+    <div class="legend" style="margin-top:-8px;letter-spacing:.16em">Rhythm-Camembert</div>
+    <p class="sub">노트가 판정선에 닿는 순간 맞춰 누르세요.<br>키보드 또는 하단 패드 <b>탭</b></p>
+    <button id="toSongBtn">곡 선택 ▶</button>
+    <button class="ghost" id="toSettingsBtn">⚙ 설정</button>
+    <button class="ghost" id="tutBtn">❔ 튜토리얼 다시 보기</button>
+    <div class="legend">소리가 켜져 있는지 확인하세요 🔊</div>
+  </div>
+
+  <!-- song select -->
+  <div class="overlay hidden" id="songScreen">
+    <h2>곡 선택</h2>
     <div class="field">
       <div class="fieldlabel">난이도</div>
       <div class="diffrow" id="diffRow">
@@ -182,22 +296,72 @@
         <div class="diff" data-d="5">Lv.5 MASTER</div>
       </div>
     </div>
+    <div id="songList"></div>
+    <input type="file" id="fileInput" accept="audio/*" style="display:none">
+    <div class="btnrow" style="margin-top:4px">
+      <button class="ghost" id="songBackBtn">◀ 메뉴</button>
+      <button class="ghost" id="songSettingsBtn">⚙ 설정</button>
+    </div>
+  </div>
 
-    <div class="field" id="kbField">
-      <div class="kbrow">
-        <span class="fieldlabel" style="letter-spacing:.1em">키보드</span>
-        <button class="toggle on" id="keyToggle">ON</button>
+  <!-- settings -->
+  <div class="overlay hidden" id="settingsScreen">
+    <h2>설정</h2>
+    <div class="setrows">
+      <div class="setrow">
+        <div class="top"><span>노트 속도</span><span class="val" id="vSpeed">1.0x</span></div>
+        <input type="range" id="sSpeed" min="0.5" max="2.5" step="0.1" value="1">
       </div>
-      <div class="diffrow" id="layoutRow">
-        <div class="lay sel" data-p="dfjk">D F J K</div>
-        <div class="lay" data-p="asdf">A S D F</div>
-        <div class="lay" data-p="wasd">W A S D</div>
-        <div class="lay" data-p="jkl">J K L ;</div>
+      <div class="setrow">
+        <div class="top"><span>싱크 보정 (오프셋)</span><span class="val" id="vOffset">0 ms</span></div>
+        <input type="range" id="sOffset" min="-200" max="200" step="5" value="0">
+        <div class="legend">노트가 빠르게 느껴지면 −, 느리면 +. 아래 버튼으로 자동 보정도 가능해요.</div>
+        <button class="ghost" id="calibBtn" style="align-self:flex-start">🎯 자동 보정하기</button>
+      </div>
+      <div class="setrow">
+        <div class="top"><span>음악 볼륨</span><span class="val" id="vMusic">80</span></div>
+        <input type="range" id="sMusic" min="0" max="100" step="5" value="80">
+      </div>
+      <div class="setrow">
+        <div class="top"><span>효과음 볼륨</span><span class="val" id="vSfx">70</span></div>
+        <input type="range" id="sSfx" min="0" max="100" step="5" value="70">
+      </div>
+      <div class="setrow">
+        <div class="top"><span>노 페일 (연습 모드)</span><button class="toggle off" id="sNofail">OFF</button></div>
+        <div class="legend">체력이 0이 되어도 끝까지 플레이합니다.</div>
+      </div>
+      <div class="setrow">
+        <div class="top"><span>키보드</span><button class="toggle on" id="sKeyboard">ON</button></div>
+        <div class="seg" id="layoutRow">
+          <div class="lay sel" data-p="dfjk">D F J K</div>
+          <div class="lay" data-p="asdf">A S D F</div>
+          <div class="lay" data-p="wasd">W A S D</div>
+          <div class="lay" data-p="jkl">J K L ;</div>
+        </div>
       </div>
     </div>
+    <button id="settingsBackBtn">완료</button>
+  </div>
 
-    <button id="startBtn">시작하기</button>
-    <div class="legend">소리가 켜져 있는지 확인하세요 🔊</div>
+  <!-- calibration -->
+  <div class="overlay hidden" id="calibScreen">
+    <h2>싱크 자동 보정</h2>
+    <p class="sub">박자에 맞춰 <b>스페이스</b> 또는 화면을 <b>탭</b>하세요.<br>여러 번 칠수록 정확해집니다.</p>
+    <div id="calibBeat" style="font-size:60px">●</div>
+    <div class="legend" id="calibInfo">탭 0회</div>
+    <div class="btnrow">
+      <button id="calibApply">적용</button>
+      <button class="ghost" id="calibCancel">취소</button>
+    </div>
+  </div>
+
+  <!-- pause -->
+  <div class="overlay hidden" id="pauseScreen">
+    <h2>일시정지</h2>
+    <div class="legend" id="pauseInfo"></div>
+    <button id="resumeBtn">재개</button>
+    <button class="secondary" id="restartBtn">처음부터</button>
+    <button class="ghost" id="quitBtn">곡 선택으로</button>
   </div>
 
   <!-- result -->
@@ -205,45 +369,81 @@
     <div class="legend" id="rankLabel">RESULT</div>
     <div class="res">
       <div class="big" id="rRank">S</div>
+      <div id="rBadge"></div>
+      <div id="rNew"></div>
       <div class="rrow"><span>Score</span><b id="rScore">0</b></div>
       <div class="rrow"><span>Accuracy</span><b id="rAcc">0%</b></div>
       <div class="rrow"><span>Max Combo</span><b id="rCombo">0</b></div>
-      <div class="rrow"><span>Perfect</span><b id="rPerfect">0</b></div>
-      <div class="rrow"><span>Good</span><b id="rGood">0</b></div>
-      <div class="rrow"><span>Miss</span><b id="rMiss">0</b></div>
+      <div class="rrow"><span class="p">Perfect</span><b id="rPerfect">0</b></div>
+      <div class="rrow"><span class="gr">Great</span><b id="rGreat">0</b></div>
+      <div class="rrow"><span class="gd">Good</span><b id="rGood">0</b></div>
+      <div class="rrow"><span class="ms">Miss</span><b id="rMiss">0</b></div>
     </div>
-    <button id="againBtn">다시하기</button>
-    <button class="ghost" id="menuBtn">메뉴로</button>
+    <div class="btnrow">
+      <button id="againBtn">다시하기</button>
+      <button class="ghost" id="menuBtn">곡 선택</button>
+    </div>
   </div>
+
+  <!-- tutorial cards -->
+  <div class="overlay hidden" id="tutCard"></div>
 </div>
 
 <script>
 /* ============================================================
-   리듬베르 (Rhythm-Camembert) — single-file 4-key rhythm game
+   리듬베르 (Rhythm-Camembert) — single-file rhythm game  (build 2026-06-25)
+   4-key · 내장 곡 + 음악 파일 업로드 · 홀드 노트 · 체력바
+   판정 세분화 · 싱크 보정 · 기록 저장 · 타격 이펙트
    ============================================================ */
 const $ = s => document.querySelector(s);
 const lanesEl = [0,1,2,3].map(i => document.querySelector(`.lane[data-l="${i}"]`));
 const padsEl  = [0,1,2,3].map(i => document.querySelector(`.pad[data-l="${i}"]`));
 const glowEl  = [0,1,2,3].map(i => lanesEl[i].querySelector('.glow'));
-
 const isMobile = window.matchMedia('(pointer:coarse)').matches || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-const BPM = 100;
-const SPB = 60/BPM;              // seconds per beat
-const HIT_PERFECT = 0.07;        // |dt| windows (s)
-const HIT_GOOD    = 0.14;
-const HIT_MISS    = 0.20;
+/* ---------- timing windows (seconds) ---------- */
+const W_PERFECT = 0.045, W_GREAT = 0.090, W_GOOD = 0.135, W_MISS = 0.180;
+const HOLD_RELEASE_GRACE = 0.14;     // 꼬리 직전 이만큼 일찍 떼도 성공
+const SCORE = {PERFECT:300, GREAT:200, GOOD:100};
+const ACCW  = {PERFECT:1, GREAT:0.66, GOOD:0.33, MISS:0};
+const LIFE_MAX = 100;
+const LIFE_GAIN = {PERFECT:1.4, GREAT:0.8, GOOD:0.25};
+const LIFE_MISS = 7, LIFE_BREAK = 5;
+const JUDGE_COLORS = {PERFECT:'var(--perfect)', GREAT:'var(--great)', GOOD:'var(--good)', MISS:'var(--miss)'};
+const FX_COLORS = {PERFECT:'#7ad0c0', GREAT:'#9ab6f0', GOOD:'#c8b6e8', MISS:'#f0a0b0'};
 
-/* ---------- difficulty (5 levels) ---------- */
+/* ---------- difficulty ---------- */
 const DIFFS = {
-  1:{name:'Lv.1 EASY',   dens:0.45, eighth:0.00, six:0.00, chord:0.00, approach:1.90},
-  2:{name:'Lv.2 NORMAL', dens:0.75, eighth:0.12, six:0.00, chord:0.00, approach:1.60},
-  3:{name:'Lv.3 HARD',   dens:0.95, eighth:0.42, six:0.06, chord:0.06, approach:1.40},
-  4:{name:'Lv.4 EXPERT', dens:1.00, eighth:0.72, six:0.28, chord:0.16, approach:1.18},
-  5:{name:'Lv.5 MASTER', dens:1.00, eighth:0.96, six:0.62, chord:0.24, approach:1.00},
+  1:{name:'EASY',   dens:0.42, eighth:0.00, six:0.00, chord:0.00, hold:0.10, approach:1.95, gap:0.46},
+  2:{name:'NORMAL', dens:0.72, eighth:0.12, six:0.00, chord:0.00, hold:0.14, approach:1.62, gap:0.34},
+  3:{name:'HARD',   dens:0.94, eighth:0.42, six:0.06, chord:0.06, hold:0.18, approach:1.40, gap:0.23},
+  4:{name:'EXPERT', dens:1.00, eighth:0.72, six:0.28, chord:0.16, hold:0.16, approach:1.18, gap:0.16},
+  5:{name:'MASTER', dens:1.00, eighth:0.96, six:0.62, chord:0.24, hold:0.12, approach:1.00, gap:0.11},
 };
 let level = 2;
-let approach = DIFFS[level].approach;
+
+/* ---------- note frequencies ---------- */
+const HZ = {
+  C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196.00,A3:220.00,B3:246.94,
+  C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392.00,A4:440.00,B4:493.88,
+  C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880.00,B5:987.77,
+};
+/* ---------- internal songs ---------- */
+const SONGS = [
+  { id:'camembert', title:'리듬베르 테마', artist:'Synth', bpm:100, bars:8, ic:'🐈‍⬛',
+    scale:[HZ.C4,HZ.D4,HZ.E4,HZ.G4,HZ.A4,HZ.C5,HZ.D5,HZ.E5],
+    melody:[0,2,4,5,4,2,3,5, 6,5,4,2,4,5,6,7, 5,4,2,0,2,3,4,2, 0,2,4,6,5,3,1,-1] },
+  { id:'sugar', title:'Sugar Rush', artist:'Synth', bpm:128, bars:8, ic:'🍬',
+    scale:[HZ.F4,HZ.G4,HZ.A4,HZ.C5,HZ.D5,HZ.F5,HZ.G5,HZ.A5],
+    melody:[0,0,2,4,3,3,1,2, 4,4,5,7,6,4,5,3, 2,4,3,5,4,2,1,0, 2,3,4,5,7,5,4,-1] },
+  { id:'midnight', title:'Midnight Stroll', artist:'Synth', bpm:88, bars:8, ic:'🌙',
+    scale:[HZ.A3,HZ.C4,HZ.D4,HZ.E4,HZ.G4,HZ.A4,HZ.C5,HZ.D5],
+    melody:[4,3,2,1,2,3,4,-1, 5,4,3,2,3,-1,2,-1, 1,2,3,4,5,4,3,2, 1,-1,2,-1,1,-1,0,-1] },
+  { id:'hyper', title:'Hyper Drive', artist:'Synth', bpm:160, bars:8, ic:'⚡',
+    scale:[HZ.G4,HZ.A4,HZ.B4,HZ.D5,HZ.E5,HZ.G5,HZ.A5,HZ.B5],
+    melody:[0,1,2,3,4,3,2,1, 2,3,4,5,6,5,4,3, 4,5,6,7,5,6,4,5, 7,6,5,4,2,4,7,-1] },
+];
+const SONG_COLORS = ['#ff9ec4','#ffc97a','#9ab6f0','#9fd6c4','#c4a7f5'];
 
 /* ---------- key presets ---------- */
 const KEY_PRESETS = {
@@ -252,265 +452,543 @@ const KEY_PRESETS = {
   wasd:{keys:['KeyW','KeyA','KeyS','KeyD'],     disp:['W','A','S','D']},
   jkl :{keys:['KeyJ','KeyK','KeyL','Semicolon'],disp:['J','K','L',';']},
 };
-let preset = 'dfjk';
-let keyboardOn = !isMobile;
 let keyToLane = {};
 function applyPreset(){
   keyToLane = {};
-  KEY_PRESETS[preset].keys.forEach((k,i)=>keyToLane[k]=i);
+  KEY_PRESETS[settings.layout].keys.forEach((k,i)=>keyToLane[k]=i);
   updatePadLabels();
 }
 function updatePadLabels(){
-  const show = keyboardOn && !isMobile;
-  const disp = KEY_PRESETS[preset].disp;
+  const show = settings.keyboard && !isMobile;
+  const disp = KEY_PRESETS[settings.layout].disp;
   padsEl.forEach((p,i)=> p.textContent = show ? disp[i] : '');
 }
 
-/* ---------- Web Audio synth ---------- */
-let ac, master;
+/* ---------- settings + persistence ---------- */
+const DEFAULTS = {speed:1.0, offset:0, music:80, sfx:70, nofail:false, layout:'dfjk', keyboard:!isMobile};
+let settings = Object.assign({}, DEFAULTS);
+function loadSettings(){
+  try{ const s=JSON.parse(localStorage.getItem('rc_settings')); if(s) settings=Object.assign({}, DEFAULTS, s); }catch(e){}
+}
+function saveSettings(){ try{ localStorage.setItem('rc_settings', JSON.stringify(settings)); }catch(e){} }
+function bestKey(songId,lv){ return 'rc_best_'+songId+'_'+lv; }
+function getBest(songId,lv){ try{ return JSON.parse(localStorage.getItem(bestKey(songId,lv))); }catch(e){ return null; } }
+function saveBest(songId,lv,rec){ try{ localStorage.setItem(bestKey(songId,lv), JSON.stringify(rec)); }catch(e){} }
+
+/* ---------- Web Audio ---------- */
+let ac, master, musicGain, sfxGain, noiseBuf;
 function initAudio(){
+  if(ac) return;
   ac = new (window.AudioContext||window.webkitAudioContext)();
-  master = ac.createGain(); master.gain.value = 0.9; master.connect(ac.destination);
+  master = ac.createGain(); master.gain.value = 1; master.connect(ac.destination);
+  musicGain = ac.createGain(); musicGain.connect(master);
+  sfxGain = ac.createGain(); sfxGain.connect(master);
+  applyVolumes();
+  makeNoise();
 }
-function env(node, t, a, d, peak){
-  node.gain.setValueAtTime(0.0001, t);
-  node.gain.exponentialRampToValueAtTime(peak, t+a);
-  node.gain.exponentialRampToValueAtTime(0.0001, t+a+d);
+function applyVolumes(){
+  if(!ac) return;
+  musicGain.gain.value = (settings.music/100) * 0.9;
+  sfxGain.gain.value = (settings.sfx/100) * 1.0;
 }
-function tone(freq, t, dur=0.18, type='triangle', vol=0.22){
+function makeNoise(){
+  const n=Math.floor(ac.sampleRate*0.2); noiseBuf=ac.createBuffer(1,n,ac.sampleRate);
+  const d=noiseBuf.getChannelData(0); for(let i=0;i<n;i++) d[i]=Math.random()*2-1;
+}
+function tone(freq, t, dur=0.18, type='triangle', vol=0.22, bus){
   const o=ac.createOscillator(), g=ac.createGain();
   o.type=type; o.frequency.setValueAtTime(freq,t);
-  o.connect(g); g.connect(master);
-  env(g,t,0.005,dur,vol);
+  o.connect(g); g.connect(bus||musicGain);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
   o.start(t); o.stop(t+dur+0.05);
 }
 function kick(t){
   const o=ac.createOscillator(), g=ac.createGain();
   o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12);
   g.gain.setValueAtTime(0.5,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.18);
-  o.connect(g);g.connect(master);o.start(t);o.stop(t+0.2);
+  o.connect(g);g.connect(musicGain);o.start(t);o.stop(t+0.2);
 }
-let noiseBuf;
-function makeNoise(){
-  const n=ac.sampleRate*0.2; noiseBuf=ac.createBuffer(1,n,ac.sampleRate);
-  const d=noiseBuf.getChannelData(0); for(let i=0;i<n;i++) d[i]=Math.random()*2-1;
+function snare(t){
+  const s=ac.createBufferSource(); s.buffer=noiseBuf;
+  const bp=ac.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1800;
+  const g=ac.createGain(); g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.12);
+  s.connect(bp);bp.connect(g);g.connect(musicGain); s.start(t); s.stop(t+0.13);
 }
-function hat(t,vol=0.12){
+function hat(t,vol=0.1){
   const s=ac.createBufferSource(); s.buffer=noiseBuf;
   const hp=ac.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=7000;
   const g=ac.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
-  s.connect(hp);hp.connect(g);g.connect(master); s.start(t); s.stop(t+0.06);
+  s.connect(hp);hp.connect(g);g.connect(musicGain); s.start(t); s.stop(t+0.06);
 }
-function hitSound(good){
-  if(!ac) return;
+function hitSound(tier){
+  if(!ac || settings.sfx<=0) return;
   const t=ac.currentTime;
-  tone(good?880:660, t, 0.09, 'sine', good?0.18:0.12);
+  const f = tier==='PERFECT'?990 : tier==='GREAT'?820 : 660;
+  tone(f, t, 0.08, 'sine', tier==='PERFECT'?0.2:0.14, sfxGain);
+}
+function clickSound(){
+  if(!ac || settings.sfx<=0) return;
+  const t=ac.currentTime;
+  const o=ac.createOscillator(), g=ac.createGain();
+  o.type='square'; o.frequency.setValueAtTime(320,t);
+  o.connect(g); g.connect(sfxGain);
+  g.gain.setValueAtTime(0.045,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.04);
+  o.start(t); o.stop(t+0.05);
 }
 
-/* ---------- Song / chart ---------- */
-const SC = {C4:261.63,D4:293.66,E4:329.63,G4:392.0,A4:440.0,C5:523.25,D5:587.33,E5:659.25};
-const NOTES = [SC.C4,SC.D4,SC.E4,SC.G4,SC.A4,SC.C5,SC.D5,SC.E5];
-const MELODY = [0,2,4,5, 4,2,3,5, 6,5,4,2, 4,5,6,7,  5,4,2,0, 2,3,4,2, 0,2,4,6, 5,3,1,-1];
-
-let chart=[];
+/* ---------- chart ---------- */
+let chart=[];          // {t,lane,dur,hold,el, headHit,holding,missed,tailDone,broken, durPx,lastTick}
 let songLen=0;
-const BARS=8, TOTAL_BEATS=BARS*4;
+let curSong=null;      // current SONGS entry OR upload pseudo-song
+let uploadBuffer=null; // decoded AudioBuffer for uploads
+let SPB=0, TOTAL_BEATS=0;
+let approach=1.6;
 
-function buildChart(){
+function buildChartSynth(song, lv){
   chart=[];
-  const cfg = DIFFS[level];
-  approach = cfg.approach;
+  const cfg=DIFFS[lv];
+  SPB = 60/song.bpm;
+  TOTAL_BEATS = song.bars*4;
+  approach = cfg.approach / settings.speed;
+  songLen = TOTAL_BEATS*SPB;
   let lastLane=-1;
-  const addNote=(beat,lane)=>{ chart.push({t:beat*SPB, lane, hit:false, missed:false, el:null}); };
+  const laneFreeAt=[0,0,0,0];   // beat until which lane is occupied by a hold
   const pick=()=>{
-    let l=Math.floor(Math.random()*4);
-    if(l===lastLane && level<5) l=(l+1)%4;
+    let l=Math.floor(Math.random()*4), tries=0;
+    while((l===lastLane || laneFreeAt[l]>0) && tries<8){ l=(l+1)%4; tries++; }
     lastLane=l; return l;
   };
-  const steps = TOTAL_BEATS*4;   // sixteenth-note grid
+  const add=(beat,lane,holdBeats)=>{
+    const dur=(holdBeats||0)*SPB;
+    chart.push({t:beat*SPB, lane, dur, hold:dur>0, el:null, hit:false,
+      headHit:false, holding:false, missed:false, tailDone:false, broken:false, durPx:0, lastTick:0});
+    if(dur>0) laneFreeAt[lane]=beat+holdBeats+0.5;
+  };
+  const steps = TOTAL_BEATS*4;   // 16th grid
   for(let s=0;s<steps;s++){
     const beat=s/4;
-    if(beat<1){ if(s===2){ addNote(0.5, pick()); } continue; } // tiny lead-in
+    for(let l=0;l<4;l++) if(laneFreeAt[l]>0 && beat>=laneFreeAt[l]) laneFreeAt[l]=0;
+    if(beat<1){ if(s===2) add(0.5, pick(), 0); continue; } // lead-in
     let p;
-    if(s%4===0) p=cfg.dens;        // on-beat
-    else if(s%2===0) p=cfg.eighth; // eighth
-    else p=cfg.six;                // sixteenth
+    if(s%4===0) p=cfg.dens; else if(s%2===0) p=cfg.eighth; else p=cfg.six;
     if(Math.random()<p){
       const lane=pick();
-      addNote(beat, lane);
-      if(Math.random()<cfg.chord){
-        let l2=(lane + 1 + Math.floor(Math.random()*3))%4;
-        addNote(beat, l2);
+      // hold note on strong beats (Hard+)
+      let holdBeats=0;
+      if(s%4===0 && Math.random()<cfg.hold && beat<TOTAL_BEATS-2){
+        holdBeats = Math.random()<0.5?1:2;
+      }
+      add(beat, lane, holdBeats);
+      if(holdBeats===0 && Math.random()<cfg.chord){
+        let l2=(lane+1+Math.floor(Math.random()*3))%4;
+        if(laneFreeAt[l2]===0) add(beat, l2, 0);
       }
     }
   }
   chart.sort((a,b)=>a.t-b.t);
-  songLen = TOTAL_BEATS*SPB;
 }
 
-/* ---------- Music scheduler ---------- */
-let startTime=0, beatSched=0;
+/* onset detection for uploaded audio */
+function detectOnsets(buffer){
+  const ch0=buffer.getChannelData(0);
+  const ch1=buffer.numberOfChannels>1?buffer.getChannelData(1):null;
+  const N=ch0.length, sr=buffer.sampleRate;
+  const frame=1024, hop=512;
+  const nF=Math.max(0,Math.floor((N-frame)/hop));
+  const energy=new Float32Array(nF);
+  for(let i=0;i<nF;i++){
+    let sum=0; const st=i*hop;
+    for(let j=0;j<frame;j++){ let s=ch0[st+j]; if(ch1) s=(s+ch1[st+j])*0.5; sum+=s*s; }
+    energy[i]=Math.sqrt(sum/frame);
+  }
+  const flux=new Float32Array(nF);
+  for(let i=1;i<nF;i++){ const d=energy[i]-energy[i-1]; flux[i]=d>0?d:0; }
+  const onsets=[]; const w=10; const fps=sr/hop;
+  let last=-999;
+  for(let i=1;i<nF-1;i++){
+    let mean=0,cnt=0;
+    for(let k=Math.max(0,i-w);k<=Math.min(nF-1,i+w);k++){ mean+=flux[k]; cnt++; }
+    mean/=cnt;
+    const thr=mean*1.5+1e-4;
+    if(flux[i]>thr && flux[i]>=flux[i-1] && flux[i]>=flux[i+1] && (i-last)/fps>=0.09){
+      onsets.push(i*hop/sr); last=i;
+    }
+  }
+  return onsets;
+}
+function buildChartFromOnsets(onsets, dur, lv){
+  chart=[];
+  const cfg=DIFFS[lv];
+  approach = cfg.approach / settings.speed;
+  songLen = dur;
+  SPB=0; TOTAL_BEATS=0;   // uploads: no synth beat-pulse
+  // enforce difficulty spacing
+  const minGap=cfg.gap; let prev=-999; let kept=[];
+  for(const t of onsets){ if(t-prev>=minGap){ kept.push(t); prev=t; } }
+  // fill long silent gaps so it stays playable
+  const filled=[]; const maxGap=Math.max(1.1, minGap*5);
+  for(let i=0;i<kept.length;i++){
+    filled.push(kept[i]);
+    const next = i<kept.length-1?kept[i+1]:dur;
+    let g=next-kept[i];
+    while(g>maxGap){ const t=filled[filled.length-1]+maxGap*0.8; if(t>=dur-0.3)break; filled.push(t); g=next-t; }
+  }
+  let lastLane=-1;
+  const laneFreeAt=[0,0,0,0];
+  for(let i=0;i<filled.length;i++){
+    const t=filled[i];
+    for(let l=0;l<4;l++) if(laneFreeAt[l]>0 && t>=laneFreeAt[l]) laneFreeAt[l]=0;
+    let l=Math.floor(Math.random()*4), tries=0;
+    while((l===lastLane||laneFreeAt[l]>0)&&tries<8){ l=(l+1)%4; tries++; }
+    lastLane=l;
+    // occasional hold on big gaps (Hard+)
+    let d=0;
+    const nextT=i<filled.length-1?filled[i+1]:dur;
+    if(cfg.hold>0 && (nextT-t)>0.7 && Math.random()<cfg.hold*2){
+      d=Math.min(nextT-t-0.2, 0.55); if(d<0.25) d=0;
+    }
+    chart.push({t, lane:l, dur:d, hold:d>0, el:null, hit:false,
+      headHit:false, holding:false, missed:false, tailDone:false, broken:false, durPx:0, lastTick:0});
+    if(d>0) laneFreeAt[l]=t+d+0.2;
+    if(cfg.chord>0 && d===0 && Math.random()<cfg.chord){
+      let l2=(l+1+Math.floor(Math.random()*3))%4;
+      if(laneFreeAt[l2]===0) chart.push({t, lane:l2, dur:0, hold:false, el:null, hit:false,
+        headHit:false, holding:false, missed:false, tailDone:false, broken:false, durPx:0, lastTick:0});
+    }
+  }
+  chart.sort((a,b)=>a.t-b.t);
+}
+
+/* ---------- music scheduler (synth songs) ---------- */
+let startTime=0, beatSched=0, srcNode=null;
 function scheduleMusic(now){
+  if(!curSong || curSong.isUpload) return;
+  const song=curSong;
   const ahead = now - startTime + 0.4;
   while(beatSched*0.5*SPB < ahead && beatSched < TOTAL_BEATS*2){
-    const halfBeat = beatSched;
-    const t = startTime + halfBeat*0.5*SPB;
-    const beat = halfBeat/2;
+    const half=beatSched, t=startTime + half*0.5*SPB, beat=half/2;
     if(beat < TOTAL_BEATS){
       if(Number.isInteger(beat)){
         if(beat%2===0) kick(t);
-        const mi=MELODY[beat%MELODY.length];
-        if(mi>=0) tone(NOTES[mi], t, 0.22, 'triangle', 0.16);
+        if(beat%4===2) snare(t);
+        const mi=song.melody[beat % song.melody.length];
+        if(mi>=0) tone(song.scale[mi], t, 0.22, 'triangle', 0.16);
       }
-      hat(t, halfBeat%2? 0.06:0.1);
+      hat(t, half%2?0.06:0.1);
     }
     beatSched++;
   }
 }
+function startUploadPlayback(){
+  if(!uploadBuffer) return;
+  srcNode = ac.createBufferSource();
+  srcNode.buffer = uploadBuffer;
+  srcNode.connect(musicGain);
+  srcNode.start(startTime);
+}
+function stopMusic(){
+  if(srcNode){ try{ srcNode.stop(); }catch(e){} srcNode=null; }
+}
 
-/* ---------- Game state ---------- */
-let running=false, raf=0;
-let score=0, combo=0, maxCombo=0, cPerfect=0, cGood=0, cMiss=0, totalNotes=0;
-let laneH=0, lineY=0;
+/* ---------- game state ---------- */
+let running=false, paused=false, raf=0;
+let score=0, combo=0, maxCombo=0, life=LIFE_MAX, failed=false;
+let counts={PERFECT:0,GREAT:0,GOOD:0,MISS:0}, totalNotes=0;
+let laneH=0, lineY=0, laneCenter=[0,0,0,0], fxW=0, fxH=0;
+const fx=$('#fx'), fxc=fx.getContext('2d');
+let particles=[];
+let lastBeatPulse=-1;
+const down=[false,false,false,false];
 
 function layout(){
   laneH = lanesEl[0].clientHeight;
   lineY = laneH - 30;
   $('#hitline').style.top = (lanesEl[0].offsetTop + lineY) + 'px';
+  const lanesBox=$('#lanes');
+  fxW=lanesBox.clientWidth; fxH=lanesBox.clientHeight;
+  fx.width=fxW; fx.height=fxH; fx.style.width=fxW+'px'; fx.style.height=fxH+'px';
+  for(let i=0;i<4;i++) laneCenter[i]=lanesEl[i].offsetLeft + lanesEl[i].clientWidth/2;
 }
-window.addEventListener('resize', ()=>{ if(running) layout(); });
+window.addEventListener('resize', ()=>{ if(running||paused) layout(); });
 
-function reset(){
-  score=0;combo=0;maxCombo=0;cPerfect=0;cGood=0;cMiss=0;
-  $('#score').textContent='0'; $('#acc').textContent='100%';
-  lanesEl.forEach(l=>l.querySelectorAll('.note').forEach(n=>n.remove()));
-}
+function songTime(){ return ac.currentTime - startTime - settings.offset/1000; }
 
-function start(){
-  if(!ac){ initAudio(); makeNoise(); }
+/* ---------- start / build ---------- */
+function startGame(){
+  running=false; paused=false; cancelAnimationFrame(raf); stopMusic();  // clean slate (guards re-entry races)
+  initAudio();
   if(ac.state==='suspended') ac.resume();
-  buildChart(); totalNotes=chart.length;
-  reset();
-  $('#startScreen').classList.add('hidden');
-  $('#resultScreen').classList.add('hidden');
+  applyVolumes();
+  if(curSong.isUpload) buildChartFromOnsets(curSong.onsets, uploadBuffer.duration, level);
+  else buildChartSynth(curSong, level);
+  totalNotes=chart.length;
+  if(!totalNotes){   // e.g. silent / unreadable upload yielded no beats
+    $('#songList').innerHTML='<div class="legend" style="color:#e58aa0">이 음악에서는 박자를 찾지 못했어요.<br>다른 곡으로 다시 시도해 주세요.</div>';
+    $('#pauseBtn').classList.remove('show');
+    showScreen('songScreen');
+    setTimeout(refreshSongList, 2400);
+    return;
+  }
+  // reset
+  score=0;combo=0;maxCombo=0;life=LIFE_MAX;failed=false;
+  counts={PERFECT:0,GREAT:0,GOOD:0,MISS:0};
+  particles.length=0; lastBeatPulse=-1;
+  lanesEl.forEach(l=>l.querySelectorAll('.note').forEach(n=>n.remove()));
+  $('#score').textContent='0'; $('#acc').textContent='100%';
+  updateLife();
+  hideAllOverlays();
+  $('#pauseBtn').classList.add('show');
   layout();
-  running=true;
-  startTime = ac.currentTime + 1.2;
+  running=true; paused=false;
+  startTime = ac.currentTime + 3.0;   // offset is applied in songTime(), not here
   beatSched=0;
+  if(curSong.isUpload) startUploadPlayback();
   loop();
 }
 
 function spawnNote(n){
   const el=document.createElement('div');
-  el.className='note';
+  el.className = 'note'+(n.hold?' hold':'');
+  if(n.hold){
+    n.durPx = Math.max(8,(n.dur/approach)*lineY);
+    el.style.height=(n.durPx+24)+'px';
+  }
   lanesEl[n.lane].appendChild(el);
   n.el=el;
 }
 
+/* ---------- main loop ---------- */
 function loop(){
-  if(!running) return;
-  const now = ac.currentTime;
-  const songT = now - startTime;
+  if(!running||paused) return;
+  const now=ac.currentTime, sT=songTime();
   scheduleMusic(now);
 
+  // countdown
+  if(sT<0){
+    const c=Math.ceil(-sT);
+    $('#countdown').classList.add('show');
+    $('#countdown').textContent = c>0 ? c : 'GO';
+  } else if($('#countdown').classList.contains('show') && sT>0.25){
+    $('#countdown').classList.remove('show');
+  }
+
+  // beat pulse
+  if(SPB>0 && sT>=0){
+    const b=Math.floor(sT/SPB);
+    if(b!==lastBeatPulse && b%2===0){ lastBeatPulse=b; pulseStage(); }
+  }
+
   for(const n of chart){
-    if(!n.el && !n.hit && !n.missed && n.t - songT <= approach && n.t - songT > -0.05){
+    // spawn
+    if(!n.el && !n.hit && !n.headHit && !n.missed && n.t-sT<=approach && n.t-sT>-W_MISS){
       spawnNote(n);
     }
-    if(n.el && !n.hit){
-      const dt = n.t - songT;
-      const prog = 1 - dt/approach;
-      n.el.style.transform = `translateY(${prog*lineY}px)`;
-      if(dt < -HIT_MISS && !n.missed){
-        n.missed=true; registerMiss(); n.el.remove(); n.el=null;
+    if(!n.el) continue;
+
+    if(n.hold){
+      if(!n.headHit && !n.missed){
+        // head falling
+        const prog=1-(n.t-sT)/approach;
+        n.el.style.transform=`translateY(${prog*lineY - n.durPx}px)`;
+        if(n.t-sT < -W_MISS){ n.missed=true; registerMiss(n.lane); removeEl(n); }
+      } else if(n.holding && !n.tailDone){
+        // held: head anchored at line, body shrinks
+        const remain=(n.t+n.dur)-sT;
+        const bodyPx=Math.max(0,(remain/approach)*lineY);
+        n.el.style.height=(bodyPx+24)+'px';
+        n.el.style.transform=`translateY(${lineY-bodyPx}px)`;
+        // hold ticks
+        if(sT-n.lastTick>0.12){ n.lastTick=sT; score+=6; $('#score').textContent=score;
+          life=Math.min(LIFE_MAX,life+0.15); }
+        if(sT>=n.t+n.dur){ completeHold(n); }
+      }
+    } else {
+      if(!n.hit){
+        const prog=1-(n.t-sT)/approach;
+        n.el.style.transform=`translateY(${prog*lineY}px)`;
+        if(n.t-sT < -W_MISS && !n.missed){ n.missed=true; registerMiss(n.lane); removeEl(n); }
       }
     }
   }
 
-  const judged=cPerfect+cGood+cMiss;
-  if(judged) $('#acc').textContent = Math.round(((cPerfect+cGood*0.6)/judged)*100)+'%';
+  if(!running) return;   // a miss this frame may have triggered fail() → finish()
 
-  if(songT > songLen + 1.0){ end(); return; }
+  // accuracy + progress
+  const judged=counts.PERFECT+counts.GREAT+counts.GOOD+counts.MISS;
+  if(judged) $('#acc').textContent=Math.round(accuracy()*100)+'%';
+  $('#progressBar').style.width=Math.max(0,Math.min(1,sT/songLen))*100+'%';
+
+  drawFx();
+
+  if(sT>songLen+1.0){ finish(false); return; }
   raf=requestAnimationFrame(loop);
 }
 
-/* ---------- Input & judgment ---------- */
-function hitLane(lane){
-  if(!running) return;
-  const songT = ac.currentTime - startTime;
+/* ---------- input / judgment ---------- */
+function nearestNote(lane, sT){
   let best=null, bestAbs=999;
   for(const n of chart){
-    if(n.lane!==lane||n.hit||n.missed) continue;
-    const adt=Math.abs(n.t-songT);
-    if(adt<bestAbs){bestAbs=adt;best=n;}
+    if(n.lane!==lane||n.headHit||n.hit||n.missed) continue;
+    const adt=Math.abs(n.t-sT);
+    if(adt<bestAbs){ bestAbs=adt; best=n; }
   }
-  if(best && bestAbs<=HIT_GOOD){
-    best.hit=true;
-    if(best.el){best.el.remove();best.el=null;}
-    registerHit(bestAbs<=HIT_PERFECT ? 'PERFECT' : 'GOOD');
+  return {best, bestAbs};
+}
+function tierFor(adt){
+  if(adt<=W_PERFECT) return 'PERFECT';
+  if(adt<=W_GREAT) return 'GREAT';
+  if(adt<=W_GOOD) return 'GOOD';
+  return null;
+}
+function hitLane(lane){
+  if(!running||paused) return;
+  const sT=songTime();
+  const {best,bestAbs}=nearestNote(lane,sT);
+  if(!best || bestAbs>W_GOOD) return;
+  const tier=tierFor(bestAbs);
+  if(!tier) return;
+  const early = (best.t - sT) > 0;
+  if(best.hold){
+    best.headHit=true; best.holding=true; best.lastTick=sT;
+    best.el && best.el.classList.add('holding');
+    applyJudge(tier, lane, early);
+  } else {
+    best.hit=true; removeEl(best);
+    applyJudge(tier, lane, early);
   }
 }
-
-function registerHit(kind){
-  const perfect = kind==='PERFECT';
-  if(perfect){cPerfect++; score+=300;} else {cGood++; score+=150;}
-  combo++; maxCombo=Math.max(maxCombo,combo);
-  score += Math.min(combo,50);
+function releaseLane(lane){
+  if(!running||paused) return;
+  const sT=songTime();
+  for(const n of chart){
+    if(n.lane===lane && n.holding && !n.tailDone){
+      if(sT >= n.t+n.dur-HOLD_RELEASE_GRACE){ completeHold(n); }
+      else { // released too early
+        n.holding=false; n.broken=true; n.tailDone=true;
+        combo=0; counts.MISS++; life=Math.max(0,life-LIFE_BREAK);
+        $('#combo').style.opacity=0; updateLife();
+        showJudge('MISS',null); removeEl(n);
+        if(life<=0 && !settings.nofail) fail();
+      }
+    }
+  }
+}
+function completeHold(n){
+  if(n.tailDone) return;
+  n.holding=false; n.tailDone=true;
+  if(n.el) n.el.classList.remove('holding');
+  removeEl(n);
+  // tail success
+  counts.PERFECT++; combo++; maxCombo=Math.max(maxCombo,combo);
+  score += SCORE.PERFECT + Math.min(combo,80);
+  life=Math.min(LIFE_MAX,life+LIFE_GAIN.PERFECT);
   $('#score').textContent=score;
-  showJudge(kind, perfect?'var(--perfect)':'var(--good)');
-  showCombo();
-  hitSound(perfect);
+  showJudge('PERFECT',null); showCombo();
+  spawnFx(n.lane,'PERFECT'); updateLife();
 }
-function registerMiss(){
-  cMiss++; combo=0;
-  showJudge('MISS','var(--miss)');
+function applyJudge(tier, lane, early){
+  counts[tier]++;
+  combo++; maxCombo=Math.max(maxCombo,combo);
+  score += SCORE[tier] + Math.min(combo,80);
+  life=Math.min(LIFE_MAX,life+LIFE_GAIN[tier]);
+  $('#score').textContent=score;
+  showJudge(tier, tier==='PERFECT'?null:early);
+  showCombo(); hitSound(tier); spawnFx(lane,tier); updateLife();
+}
+function registerMiss(lane){
+  counts.MISS++; combo=0;
+  life=Math.max(0,life-LIFE_MISS);
+  showJudge('MISS',null);
   $('#combo').style.opacity=0;
+  updateLife();
+  if(life<=0 && !settings.nofail) fail();
+}
+function removeEl(n){ if(n.el){ n.el.remove(); n.el=null; } }
+function accuracy(){
+  const j=counts.PERFECT+counts.GREAT+counts.GOOD+counts.MISS;
+  if(!j) return 1;
+  return (counts.PERFECT*ACCW.PERFECT+counts.GREAT*ACCW.GREAT+counts.GOOD*ACCW.GOOD)/j;
+}
+function updateLife(){
+  const lb=$('#lifeBar');
+  lb.style.width=Math.max(0,Math.min(100,life))+'%';
+  lb.classList.toggle('low', life<=30);
 }
 
-/* ---------- Feedback visuals ---------- */
-function showJudge(text,color){
-  const j=$('#judge'); j.textContent=text; j.style.color=color;
+/* ---------- visuals ---------- */
+function showJudge(text,early){
+  const j=$('#judge'); j.textContent=text; j.style.color=JUDGE_COLORS[text]||'var(--ink)';
   j.style.opacity=1; j.style.transition='none'; j.style.transform='scale(1.15)';
   requestAnimationFrame(()=>{ j.style.transition='opacity .4s, transform .25s'; j.style.opacity=0; j.style.transform='scale(1)'; });
+  const js=$('#judgeSub');
+  if(early===true||early===false){
+    js.textContent = early?'FAST':'SLOW';
+    js.style.color = early?'#f0b0a0':'#a0b0f0';
+    js.style.opacity=1; js.style.transition='none';
+    requestAnimationFrame(()=>{ js.style.transition='opacity .45s'; js.style.opacity=0; });
+  }
 }
 function showCombo(){
   if(combo<2) return;
   const c=$('#combo'); $('#comboNum').textContent=combo;
   c.style.transition='none'; c.style.opacity=1; c.style.transform='scale(1.12)';
-  requestAnimationFrame(()=>{ c.style.transition='transform .2s'; c.style.transform='scale(1)'; });
+  requestAnimationFrame(()=>{ c.style.transition='transform .2s, opacity .4s'; c.style.transform='scale(1)'; });
+}
+function pulseStage(){
+  const s=$('#stage'); s.classList.add('pulse');
+  setTimeout(()=>s.classList.remove('pulse'),110);
+}
+function spawnFx(lane,tier){
+  const x=laneCenter[lane], y=lineY, col=FX_COLORS[tier]||'#fff';
+  const n = tier==='MISS'?5:12;
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, sp=1.5+Math.random()*3.5;
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2.2,life:1,col,r:2+Math.random()*3});
+  }
+}
+function drawFx(){
+  fxc.clearRect(0,0,fxW,fxH);
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.18; p.life-=0.035;
+    if(p.life<=0){ particles.splice(i,1); continue; }
+    fxc.globalAlpha=Math.max(0,p.life);
+    fxc.fillStyle=p.col;
+    fxc.beginPath(); fxc.arc(p.x,p.y,p.r*p.life+0.5,0,Math.PI*2); fxc.fill();
+  }
+  fxc.globalAlpha=1;
 }
 
-/* ---------- press feedback ---------- */
-function clickSound(){
-  if(!ac) return;
-  const t=ac.currentTime;
-  const o=ac.createOscillator(), g=ac.createGain();
-  o.type='square'; o.frequency.setValueAtTime(320,t);
-  o.connect(g); g.connect(master);
-  g.gain.setValueAtTime(0.05,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.04);
-  o.start(t); o.stop(t+0.05);
-}
-const down=[false,false,false,false];
+/* ---------- press handling ---------- */
 function pressDown(lane){
   if(down[lane]) return; down[lane]=true;
   padsEl[lane].classList.add('active');
   glowEl[lane].classList.add('on');
+  if(calibActive){ calibTap(); return; }
+  if(tutorialActive){ clickSound(); tutHit(lane); return; }
   clickSound();
   hitLane(lane);
 }
 function pressUp(lane){
+  if(!down[lane]) return;
   down[lane]=false;
   padsEl[lane].classList.remove('active');
   glowEl[lane].classList.remove('on');
+  if(tutorialActive){ tutRelease(lane); return; }
+  releaseLane(lane);
 }
 
-/* ---------- key/touch bindings ---------- */
+/* ---------- key / touch bindings ---------- */
 document.addEventListener('keydown',e=>{
-  if(!keyboardOn || e.repeat) return;
+  if(e.code==='Escape'){ if(tutorialActive){ endTutorial(); return; } if(running) togglePause(); return; }
+  if(e.code==='Space' && calibActive){ e.preventDefault(); calibTap(); return; }
+  if(!settings.keyboard || e.repeat) return;
   if(e.code in keyToLane){ e.preventDefault(); pressDown(keyToLane[e.code]); }
 });
 document.addEventListener('keyup',e=>{
-  if(!keyboardOn) return;
+  if(!settings.keyboard) return;
   if(e.code in keyToLane){ e.preventDefault(); pressUp(keyToLane[e.code]); }
 });
 padsEl.forEach((p,i)=>{
@@ -520,65 +998,383 @@ padsEl.forEach((p,i)=>{
   p.addEventListener('pointercancel',()=>pressUp(i));
 });
 
-/* ---------- end / result ---------- */
-function end(){
-  running=false; cancelAnimationFrame(raf);
-  const judged=cPerfect+cGood+cMiss || 1;
-  const acc=(cPerfect+cGood*0.6)/judged;
+/* ---------- pause ---------- */
+function togglePause(){ if(paused) resumeGame(); else pauseGame(); }
+function pauseGame(){
+  if(!running||paused) return;
+  paused=true; cancelAnimationFrame(raf);
+  if(ac) ac.suspend();
+  for(let i=0;i<4;i++) pressUp(i);
+  $('#pauseInfo').textContent = curSong.title+' · Lv.'+level;
+  $('#pauseScreen').classList.remove('hidden');
+}
+function resumeGame(){
+  if(!paused) return;
+  $('#pauseScreen').classList.add('hidden');
+  const go=()=>{ paused=false; loop(); };
+  if(ac && ac.state==='suspended') ac.resume().then(go); else go();
+}
+function quitToSongs(){
+  running=false; paused=false; cancelAnimationFrame(raf);
+  stopMusic(); if(ac) ac.resume();
+  lanesEl.forEach(l=>l.querySelectorAll('.note').forEach(n=>n.remove()));
+  $('#pauseBtn').classList.remove('show');
+  $('#countdown').classList.remove('show');
+  refreshSongList();
+  showScreen('songScreen');
+}
+
+/* ---------- finish ---------- */
+function fail(){ failed=true; finish(true); }
+function finish(isFail){
+  if(!running) return;
+  running=false; paused=false; cancelAnimationFrame(raf);
+  stopMusic(); if(ac) ac.resume();
+  $('#pauseBtn').classList.remove('show');
+  $('#countdown').classList.remove('show');
+  lanesEl.forEach(l=>l.querySelectorAll('.note').forEach(n=>n.remove()));
+  fxc.clearRect(0,0,fxW,fxH); particles.length=0;
+
+  const acc=accuracy();
+  const total=counts.PERFECT+counts.GREAT+counts.GOOD+counts.MISS;
+  const ap = total>0 && counts.GREAT===0 && counts.GOOD===0 && counts.MISS===0;
+  const fc = !ap && counts.MISS===0 && total>0;
+  let rank;
+  if(isFail) rank='F';
+  else if(ap||acc>=0.99) rank='SS';
+  else if(acc>=0.95) rank='S';
+  else if(acc>=0.90) rank='A';
+  else if(acc>=0.80) rank='B';
+  else if(acc>=0.70) rank='C';
+  else rank='D';
+
+  $('#rRank').textContent=rank;
+  $('#rRank').classList.toggle('fail',isFail);
+  $('#rankLabel').textContent = isFail?'FAILED':'RESULT';
   $('#rScore').textContent=score;
   $('#rAcc').textContent=Math.round(acc*100)+'%';
   $('#rCombo').textContent=maxCombo;
-  $('#rPerfect').textContent=cPerfect;
-  $('#rGood').textContent=cGood;
-  $('#rMiss').textContent=cMiss;
-  let rank='D';
-  if(acc>=0.97&&cMiss===0) rank='S';
-  else if(acc>=0.9) rank='A';
-  else if(acc>=0.8) rank='B';
-  else if(acc>=0.6) rank='C';
-  $('#rRank').textContent=rank;
-  $('#resultScreen').classList.remove('hidden');
+  $('#rPerfect').textContent=counts.PERFECT;
+  $('#rGreat').textContent=counts.GREAT;
+  $('#rGood').textContent=counts.GOOD;
+  $('#rMiss').textContent=counts.MISS;
+  const badge=$('#rBadge');
+  badge.innerHTML = ap?'<span class="badge ap">ALL PERFECT</span>' : fc?'<span class="badge">FULL COMBO</span>' : '';
+
+  // save best (non-fail only)
+  let isNew=false;
+  if(!isFail){
+    const prev=getBest(curSong.id, level);
+    if(!prev || score>prev.score){
+      isNew=true;
+      saveBest(curSong.id, level, {score, acc:Math.round(acc*100), rank, fc, ap, combo:maxCombo});
+    }
+  }
+  $('#rNew').innerHTML = isNew?'<span class="newrec">★ NEW RECORD ★</span>':'';
+  showScreen('resultScreen');
 }
+
+/* ---------- calibration ---------- */
+let calibActive=false, calibTimer=null, calibStart=0, calibTaps=[], calibInterval=0.6;
+function openCalib(){
+  initAudio(); if(ac.state==='suspended') ac.resume();
+  calibActive=true; calibTaps=[]; calibStart=ac.currentTime+0.5; calibInterval=0.6;
+  $('#calibInfo').textContent='탭 0회';
+  showScreen('calibScreen');
+  const tick=()=>{
+    if(!calibActive) return;
+    const t=ac.currentTime;
+    const next=calibStart+Math.ceil((t-calibStart)/calibInterval)*calibInterval;
+    const wait=Math.max(0,(next-t))*1000;
+    setTimeout(()=>{
+      if(!calibActive) return;
+      kick(ac.currentTime+0.001);
+      const b=$('#calibBeat'); b.style.transform='scale(1.3)';
+      setTimeout(()=>b.style.transform='scale(1)',90);
+      tick();
+    }, wait);
+  };
+  tick();
+}
+function calibTap(){
+  if(!calibActive) return;
+  const t=ac.currentTime;
+  const nearest=calibStart+Math.round((t-calibStart)/calibInterval)*calibInterval;
+  const err=(t-nearest)*1000; // ms, +late
+  if(t>calibStart+0.05){ calibTaps.push(err); }
+  $('#calibInfo').textContent='탭 '+calibTaps.length+'회'+(calibTaps.length>=3?' · 평균 '+Math.round(median(calibTaps))+'ms':'');
+}
+function median(a){ if(!a.length)return 0; const s=[...a].sort((x,y)=>x-y); const m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2; }
+function closeCalib(apply){
+  calibActive=false;
+  if(apply && calibTaps.length>=3){
+    const off=Math.round(median(calibTaps));
+    settings.offset=Math.max(-200,Math.min(200,off));
+    saveSettings(); syncSettingsUI();
+  }
+  showScreen('settingsScreen');
+}
+
+/* ---------- screens ---------- */
+const OVERLAYS=['menuScreen','songScreen','settingsScreen','calibScreen','pauseScreen','resultScreen','tutCard'];
+function hideAllOverlays(){ OVERLAYS.forEach(id=>$('#'+id).classList.add('hidden')); }
+function showScreen(id){ hideAllOverlays(); $('#'+id).classList.remove('hidden'); }
+
+/* song list */
+function refreshSongList(){
+  const list=$('#songList'); list.innerHTML='';
+  SONGS.forEach((s,idx)=>{
+    const best=getBest(s.id, level);
+    const card=document.createElement('div');
+    card.className='songcard';
+    card.innerHTML=`
+      <div class="ic" style="background:linear-gradient(135deg,${SONG_COLORS[idx%SONG_COLORS.length]},#ffffff66)">${s.ic}</div>
+      <div class="meta"><div class="t">${s.title}</div><div class="d">${s.artist} · BPM ${s.bpm}</div></div>
+      <div class="best">${best?('<b>'+best.score+'</b>'+best.rank+' · '+best.acc+'%'):'기록 없음'}</div>`;
+    card.addEventListener('click',()=>{ curSong=s; startGame(); });
+    list.appendChild(card);
+  });
+  const up=document.createElement('div');
+  up.className='songcard upload';
+  up.textContent='＋ 내 음악 파일 추가 (mp3 등)';
+  up.addEventListener('click',()=>$('#fileInput').click());
+  list.appendChild(up);
+}
+
+/* ---------- file upload ---------- */
+$('#fileInput').addEventListener('change', async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  e.target.value='';
+  initAudio(); if(ac.state==='suspended') ac.resume();
+  // loading UI
+  const list=$('#songList');
+  list.innerHTML='<div class="spin"></div><div class="legend" style="margin-top:10px">음악 분석 중...</div>';
+  try{
+    const buf=await file.arrayBuffer();
+    uploadBuffer=await ac.decodeAudioData(buf);
+    const onsets=detectOnsets(uploadBuffer);
+    curSong={ id:'upload', title:file.name.replace(/\.[^.]+$/,'').slice(0,24), artist:'내 음악', isUpload:true, onsets };
+    startGame();
+  }catch(err){
+    list.innerHTML='<div class="legend" style="color:#e58aa0">읽을 수 없는 파일이에요.<br>다른 음악을 시도해 주세요.</div>';
+    setTimeout(refreshSongList,1800);
+  }
+});
 
 /* ---------- menu wiring ---------- */
 $('#diffRow').addEventListener('click',e=>{
   const d=e.target.closest('.diff'); if(!d) return;
   level=parseInt(d.dataset.d,10);
-  document.querySelectorAll('.diff').forEach(x=>x.classList.toggle('sel',x===d));
+  document.querySelectorAll('#diffRow .diff').forEach(x=>x.classList.toggle('sel',x===d));
+  refreshSongList();
 });
 $('#layoutRow').addEventListener('click',e=>{
   const l=e.target.closest('.lay'); if(!l) return;
-  preset=l.dataset.p; applyPreset();
-  document.querySelectorAll('.lay').forEach(x=>x.classList.toggle('sel',x===l));
+  settings.layout=l.dataset.p; applyPreset(); saveSettings();
+  document.querySelectorAll('#layoutRow .lay').forEach(x=>x.classList.toggle('sel',x===l));
 });
-$('#keyToggle').addEventListener('click',()=>{
-  keyboardOn=!keyboardOn;
-  const t=$('#keyToggle');
-  t.textContent=keyboardOn?'ON':'OFF';
-  t.classList.toggle('on',keyboardOn);
-  t.classList.toggle('off',!keyboardOn);
-  $('#layoutRow').style.display = keyboardOn ? 'flex' : 'none';
-  updatePadLabels();
-});
-$('#startBtn').addEventListener('click',start);
-$('#againBtn').addEventListener('click',start);
-$('#menuBtn').addEventListener('click',()=>{
-  $('#resultScreen').classList.add('hidden');
-  $('#startScreen').classList.remove('hidden');
-});
+$('#toSongBtn').addEventListener('click',()=>{ initAudio(); refreshSongList(); showScreen('songScreen'); });
+$('#toSettingsBtn').addEventListener('click',()=>showScreen('settingsScreen'));
+$('#songBackBtn').addEventListener('click',()=>showScreen('menuScreen'));
+$('#songSettingsBtn').addEventListener('click',()=>showScreen('settingsScreen'));
+$('#settingsBackBtn').addEventListener('click',()=>showScreen('menuScreen'));
+$('#resumeBtn').addEventListener('click',resumeGame);
+$('#restartBtn').addEventListener('click',()=>{ $('#pauseScreen').classList.add('hidden'); stopMusic(); startGame(); });
+$('#quitBtn').addEventListener('click',quitToSongs);
+$('#pauseBtn').addEventListener('click',togglePause);
+$('#againBtn').addEventListener('click',startGame);
+$('#menuBtn').addEventListener('click',()=>{ refreshSongList(); showScreen('songScreen'); });
+$('#calibBtn').addEventListener('click',openCalib);
+$('#calibApply').addEventListener('click',()=>closeCalib(true));
+$('#calibCancel').addEventListener('click',()=>closeCalib(false));
+$('#calibScreen').addEventListener('pointerdown',e=>{ if(e.target.closest('button'))return; calibTap(); });
+
+/* settings controls */
+function syncSettingsUI(){
+  $('#sSpeed').value=settings.speed; $('#vSpeed').textContent=settings.speed.toFixed(1)+'x';
+  $('#sOffset').value=settings.offset; $('#vOffset').textContent=settings.offset+' ms';
+  $('#sMusic').value=settings.music; $('#vMusic').textContent=settings.music;
+  $('#sSfx').value=settings.sfx; $('#vSfx').textContent=settings.sfx;
+  const nf=$('#sNofail'); nf.textContent=settings.nofail?'ON':'OFF';
+  nf.classList.toggle('on',settings.nofail); nf.classList.toggle('off',!settings.nofail);
+  const kb=$('#sKeyboard'); kb.textContent=settings.keyboard?'ON':'OFF';
+  kb.classList.toggle('on',settings.keyboard); kb.classList.toggle('off',!settings.keyboard);
+  $('#layoutRow').style.display=settings.keyboard?'flex':'none';
+  document.querySelectorAll('#layoutRow .lay').forEach(x=>x.classList.toggle('sel',x.dataset.p===settings.layout));
+}
+$('#sSpeed').addEventListener('input',e=>{ settings.speed=parseFloat(e.target.value); $('#vSpeed').textContent=settings.speed.toFixed(1)+'x'; saveSettings(); });
+$('#sOffset').addEventListener('input',e=>{ settings.offset=parseInt(e.target.value,10); $('#vOffset').textContent=settings.offset+' ms'; saveSettings(); });
+$('#sMusic').addEventListener('input',e=>{ settings.music=parseInt(e.target.value,10); $('#vMusic').textContent=settings.music; applyVolumes(); saveSettings(); });
+$('#sSfx').addEventListener('input',e=>{ settings.sfx=parseInt(e.target.value,10); $('#vSfx').textContent=settings.sfx; applyVolumes(); saveSettings(); });
+$('#sNofail').addEventListener('click',()=>{ settings.nofail=!settings.nofail; syncSettingsUI(); saveSettings(); });
+$('#sKeyboard').addEventListener('click',()=>{ settings.keyboard=!settings.keyboard; updatePadLabels(); syncSettingsUI(); saveSettings(); });
+
+/* ============================================================
+   온보딩 튜토리얼 (interactive) — 느린 연습 노트로 직접 배우기
+   ============================================================ */
+const TUT_APPROACH = 2.3;
+const TUT_STAGES = [
+  {type:'card', em:'🐈‍⬛', title:'환영해요!', body:'리듬베르는 위에서 내려오는 노트를 박자에 맞춰 누르는 게임이에요.<br>노트가 아래 <b>판정선</b>에 닿는 순간 누르면 됩니다.', btn:'시작'},
+  {type:'card', em:'⌨️', title:'이렇게 눌러요', body:'키보드 <b>D F J K</b> 또는 화면 아래 <b>패드</b>를 누르세요.<br>왼쪽부터 한 레인씩 담당해요.', btn:'좋아요'},
+  {type:'tap', need:4, prompt:'노트가 <b>판정선</b>에 닿을 때 눌러보세요!'},
+  {type:'card', em:'🎯', title:'타이밍이 곧 점수', body:'정확할수록 좋은 판정을 받아요.<br><b style="color:var(--perfect)">PERFECT</b> · <b style="color:var(--great)">GREAT</b> · <b style="color:#a98fd6">GOOD</b><br>박자를 놓치면 <b style="color:var(--miss)">MISS</b>!', btn:'다음'},
+  {type:'hold', need:2, prompt:'긴 노트는 <b>누른 채로</b>! 끝에서 손을 떼세요.'},
+  {type:'card', em:'✨', title:'준비 완료!', body:'이제 곡을 골라 플레이해 보세요.<br>난이도·속도·싱크는 ⚙ 설정에서 조절할 수 있어요.', btn:'곡 고르러 가기', last:true},
+];
+let tutorialActive=false, tutRaf=0, tutStartTime=0, tutNotes=[], tutStep=0;
+let tutPractice=false, tutDone=0, tutNeed=0, tutHold=false, tutNextSpawn=0, tutFromMenu=false;
+
+function isOnboarded(){ try{ return localStorage.getItem('rc_onboarded')==='1'; }catch(e){ return false; } }
+function markOnboarded(){ try{ localStorage.setItem('rc_onboarded','1'); }catch(e){} }
+
+function startTutorial(fromMenu){
+  initAudio(); if(ac && ac.state==='suspended') ac.resume();
+  tutorialActive=true; tutFromMenu=!!fromMenu; tutStep=0; tutPractice=false;
+  tutNotes=[]; particles.length=0;
+  lanesEl.forEach(l=>l.querySelectorAll('.note').forEach(n=>n.remove()));
+  cancelAnimationFrame(raf); running=false; paused=false;
+  hideAllOverlays();
+  $('#stage').classList.add('tutoring');
+  $('#pauseBtn').classList.remove('show');
+  layout();
+  tutStartTime = ac.currentTime;
+  runStage();
+  if(!tutRaf) tutRaf=requestAnimationFrame(tutLoop);
+}
+function runStage(){
+  const st=TUT_STAGES[tutStep];
+  if(!st){ endTutorial(); return; }
+  for(const n of tutNotes) tutRemoveEl(n);
+  tutNotes=[];
+  if(st.type==='card'){
+    tutPractice=false;
+    $('#tutBanner').classList.remove('show');
+    showTutCard(st);
+  } else {
+    $('#tutCard').classList.add('hidden');
+    tutPractice=true; tutHold=(st.type==='hold'); tutDone=0; tutNeed=st.need;
+    tutNextSpawn=(ac.currentTime - tutStartTime)+0.6;
+    showTutBanner(st.prompt);
+  }
+}
+function tutNextStage(){ tutStep++; runStage(); }
+function showTutCard(st){
+  const card=$('#tutCard');
+  card.innerHTML = `<div class="em">${st.em}</div><h2>${st.title}</h2>`+
+    `<p class="sub" style="font-size:14px">${st.body}</p>`+
+    `<button id="tutNext">${st.btn}</button>`+
+    `<button class="ghost" id="tutSkipCard">건너뛰기 →</button>`;
+  card.classList.remove('hidden');
+  $('#tutNext').onclick=()=>{ if(ac && ac.state==='suspended') ac.resume(); st.last?endTutorial():tutNextStage(); };
+  $('#tutSkipCard').onclick=endTutorial;
+}
+function showTutBanner(prompt){
+  $('#tutBanner').classList.add('show');
+  $('#tutPrompt').innerHTML=prompt;
+  tutUpdateCount();
+}
+function tutUpdateCount(){ $('#tutCount').textContent=tutDone+' / '+tutNeed; }
+function tutAddNote(hitTime){
+  const lane=Math.floor(Math.random()*4);
+  const dur=tutHold?0.9:0;
+  tutNotes.push({lane, t:hitTime, dur, hold:dur>0, el:null, hit:false, headHit:false, holding:false, done:false, durPx:0});
+}
+function tutSpawnEl(n){
+  const el=document.createElement('div');
+  el.className='note'+(n.hold?' hold':'');
+  if(n.hold){ n.durPx=Math.max(8,(n.dur/TUT_APPROACH)*lineY); el.style.height=(n.durPx+24)+'px'; }
+  lanesEl[n.lane].appendChild(el); n.el=el;
+}
+function tutRemoveEl(n){ if(n.el){ n.el.remove(); n.el=null; } }
+function tutLoop(){
+  if(!tutorialActive){ tutRaf=0; return; }
+  const t=ac.currentTime - tutStartTime;
+  for(let i=tutNotes.length-1;i>=0;i--){
+    const n=tutNotes[i];
+    if(n.done){ tutRemoveEl(n); tutNotes.splice(i,1); continue; }
+    if(!n.el){ if(n.t-t<=TUT_APPROACH) tutSpawnEl(n); continue; }
+    if(n.hold && n.holding){
+      const remain=(n.t+n.dur)-t;
+      const bodyPx=Math.max(0,(remain/TUT_APPROACH)*lineY);
+      n.el.style.height=(bodyPx+24)+'px';
+      n.el.style.transform=`translateY(${lineY-bodyPx}px)`;
+      if(t>=n.t+n.dur) tutCompleteHold(n);
+    } else {
+      const prog=1-(n.t-t)/TUT_APPROACH;
+      const off=n.hold?-n.durPx:0;
+      n.el.style.transform=`translateY(${prog*lineY+off}px)`;
+      if(t-n.t>0.22) n.done=true;   // 놓쳐도 패널티 없이 다시
+    }
+  }
+  if(tutPractice && tutDone<tutNeed && tutNotes.length===0 && t>=tutNextSpawn){
+    tutAddNote(t+TUT_APPROACH); tutNextSpawn=t+0.3;
+  }
+  if(tutPractice && tutDone>=tutNeed){ tutPractice=false; $('#tutBanner').classList.remove('show'); setTimeout(tutNextStage,500); }
+  drawFx();
+  tutRaf=requestAnimationFrame(tutLoop);
+}
+function tutHit(lane){
+  if(!tutPractice) return;
+  const t=ac.currentTime - tutStartTime;
+  let best=null,ba=999;
+  for(const n of tutNotes){
+    if(n.lane!==lane||n.done||n.hit||n.headHit) continue;
+    const adt=Math.abs(n.t-t);
+    if(adt<ba){ ba=adt; best=n; }
+  }
+  if(!best||ba>W_GOOD) return;
+  const tier=ba<=W_PERFECT?'PERFECT':ba<=W_GREAT?'GREAT':'GOOD';
+  if(best.hold){
+    best.headHit=true; best.holding=true; if(best.el) best.el.classList.add('holding');
+    showJudge(tier,null); spawnFx(lane,tier); hitSound(tier);
+  } else {
+    best.hit=true; best.done=true; tutDone++; tutUpdateCount();
+    showJudge(tier,null); spawnFx(lane,tier); hitSound(tier);
+  }
+}
+function tutRelease(lane){
+  if(!tutPractice) return;
+  const t=ac.currentTime - tutStartTime;
+  for(const n of tutNotes){
+    if(n.lane===lane && n.holding && !n.done){
+      if(t>=n.t+n.dur-HOLD_RELEASE_GRACE) tutCompleteHold(n);
+      else { n.holding=false; n.headHit=false; n.done=true; }   // 너무 일찍 뗌 → 다시
+    }
+  }
+}
+function tutCompleteHold(n){
+  if(n.done) return;
+  n.done=true; n.holding=false;
+  tutDone++; tutUpdateCount();
+  showJudge('PERFECT',null); spawnFx(n.lane,'PERFECT'); hitSound('PERFECT');
+}
+function endTutorial(){
+  tutorialActive=false; tutPractice=false;
+  cancelAnimationFrame(tutRaf); tutRaf=0;
+  for(const n of tutNotes) tutRemoveEl(n);
+  tutNotes=[]; particles.length=0;
+  if(fxc) fxc.clearRect(0,0,fxW,fxH);
+  $('#tutCard').classList.add('hidden');
+  $('#tutBanner').classList.remove('show');
+  $('#stage').classList.remove('tutoring');
+  markOnboarded();
+  refreshSongList();
+  showScreen(tutFromMenu?'menuScreen':'songScreen');
+}
 
 /* ---------- init ---------- */
-function initUI(){
-  if(isMobile){
-    keyboardOn=false;
-    $('#kbField').style.display='none';        // hide keyboard settings on mobile
-    $('#howto').innerHTML='노트가 판정선에 닿는 순간<br>하단 패드를 <b>탭</b>하세요.';
-  }else{
-    $('#howto').innerHTML='노트가 판정선에 닿는 순간 맞춰 누르세요.<br>키보드 또는 하단 패드 <b>탭</b>';
-  }
+function init(){
+  loadSettings();
+  if(isMobile) settings.keyboard=false;
   applyPreset();
+  syncSettingsUI();
+  document.querySelectorAll('#diffRow .diff').forEach(x=>x.classList.toggle('sel',parseInt(x.dataset.d,10)===level));
+  refreshSongList();
+  $('#tutSkip').onclick=endTutorial;
+  $('#tutBtn').addEventListener('click',()=>startTutorial(true));
+  if(!isOnboarded()) startTutorial(false);
 }
-initUI();
+init();
 </script>
 </body>
 </html>
