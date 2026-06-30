@@ -88,8 +88,8 @@
     border:1px solid rgba(255,255,255,.16);box-shadow:none;display:none;
     z-index:7;
   }
-  #pauseBtn::before,#pauseBtn::after{content:"";display:block;width:4px;height:14px;border-radius:2px;background:#EDE9FF;}
-  #pauseBtn.show{display:flex;align-items:center;justify-content:center;gap:4px;}
+  #pauseBtn::before{content:"";display:inline-block;width:4px;height:14px;border-radius:2px;background:#EDE9FF;box-shadow:7px 0 0 #EDE9FF;}
+  #pauseBtn.show{display:flex;align-items:center;justify-content:center;}
   #pauseBtn:active{transform:translateX(-50%) scale(.94);}
 
   /* ---------------- life bar ---------------- */
@@ -254,7 +254,7 @@
   .mascot .ring{position:absolute;left:50%;bottom:6%;transform:translateX(-50%) rotateX(70deg);width:120%;height:42%;border-radius:50%;
     border:2px solid rgba(167,139,250,.45);box-shadow:0 0 24px rgba(167,139,250,.45) inset;}
   @keyframes halo{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}}
-  .brand-line{font-size:11px;letter-spacing:.34em;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:8px;}
+  .brand-line{font-size:11px;letter-spacing:.34em;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:-6px;}
 
   /* ---------------- song list ---------------- */
   #songList{display:flex;flex-direction:column;gap:11px;width:100%;max-width:344px;}
@@ -522,7 +522,7 @@ const isMobile = window.matchMedia('(pointer:coarse)').matches || /Mobi|Android|
 const W_PERFECT = 0.062, W_GREAT = 0.125, W_GOOD = 0.185, W_MISS = 0.250;
 const HOLD_RELEASE_GRACE = 0.14;     // 꼬리 직전 이만큼 일찍 떼도 성공
 const SCORE = {PERFECT:300, GREAT:200, GOOD:100};
-const ACCW  = {PERFECT:1, GREAT:0.8, GOOD:0.5, MISS:0};
+const ACCW  = {PERFECT:1, GREAT:0.66, GOOD:0.33, MISS:0};
 const LIFE_MAX = 100;
 const LIFE_GAIN = {PERFECT:1.4, GREAT:0.8, GOOD:0.25};
 const LIFE_MISS = 7, LIFE_BREAK = 5;
@@ -821,7 +821,7 @@ const down=[false,false,false,false];
 
 function layout(){
   laneH = lanesEl[0].clientHeight;
-  lineY = laneH - Math.max(60, Math.round(laneH*0.11));
+  lineY = laneH - 30;
   $('#hitline').style.top = (lanesEl[0].offsetTop + lineY) + 'px';
   const lanesBox=$('#lanes');
   fxW=lanesBox.clientWidth; fxH=lanesBox.clientHeight;
@@ -1495,12 +1495,6 @@ init();
 </script>
 <style>
 #stage{width:min(390px,100vw)!important;height:min(844px,100dvh)!important;}
-/* ===== full-bleed browsing: kill device-frame mockup on tablet/mobile ===== */
-#rbStatus{display:none!important;}
-@media(max-width:1023px){
-  body:not(.rb-playing){align-items:stretch!important;justify-content:flex-start!important;}
-  body:not(.rb-playing) #stage{width:100vw!important;height:100dvh!important;max-width:none!important;margin:0!important;border-radius:0!important;border:none!important;box-shadow:none!important;}
-}
 .rb-chips,#rbDiffRow{scrollbar-width:none;-ms-overflow-style:none;} .rb-chips::-webkit-scrollbar,#rbDiffRow::-webkit-scrollbar{display:none;height:0;} .overlay::-webkit-scrollbar{width:0;}
 /* ============ 리듬베르 — 화면 보강 v2 ============ */
 #stage .overlay button svg{width:18px;height:18px;flex:none;}
@@ -1529,10 +1523,8 @@ init();
 .rb-hero h1{font-size:36px;margin:6px 0 0;}
 .rb-mascot{width:170px;height:170px;position:relative;margin:10px auto 4px;}
 .rb-mascot .catwrap{position:relative;width:100%;height:100%;animation:catFloat 6s var(--ease) infinite;z-index:2;}
-.rb-mascot .halo{position:absolute;left:50%;top:64%;transform:translate(-50%,-50%);width:118%;height:118%;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.34),transparent 62%);filter:blur(8px);animation:halo 4s ease-in-out infinite;z-index:0;}
-.rb-xpgain{margin-top:10px;font-size:13px;font-weight:800;color:#8B5CF6;}
-.rb-sprofile .lvbar>i{transition:width .45s var(--ease);}
-.rb-mascot .ring{position:absolute;left:50%;bottom:-7%;transform:translateX(-50%) rotateX(74deg);width:110%;height:30%;border-radius:50%;border:2px solid rgba(167,139,250,.5);box-shadow:0 0 24px rgba(167,139,250,.45) inset;z-index:1;}
+.rb-mascot .halo{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:130%;height:130%;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.34),transparent 62%);filter:blur(8px);animation:halo 4s ease-in-out infinite;z-index:0;}
+.rb-mascot .ring{position:absolute;left:50%;bottom:2%;transform:translateX(-50%) rotateX(72deg);width:118%;height:40%;border-radius:50%;border:2px solid rgba(167,139,250,.5);box-shadow:0 0 24px rgba(167,139,250,.45) inset;z-index:1;}
 .rb-fnote{position:absolute;font-size:16px;z-index:3;animation:fnote 5s var(--ease) infinite;opacity:0;}
 @keyframes fnote{0%{opacity:0;transform:translateY(10px)}15%{opacity:.8}85%{opacity:.8}100%{opacity:0;transform:translateY(-40px)}}
 .rb-tut{height:54px!important;background:rgba(255,255,255,.7)!important;border:1px solid rgba(139,92,246,.2)!important;color:#5B5570!important;box-shadow:var(--sh-1)!important;font-size:15px!important;font-weight:800!important;border-radius:var(--r-lg)!important;}
@@ -1540,7 +1532,7 @@ init();
 .rb-recent{display:flex;align-items:center;gap:13px;padding:12px;cursor:pointer;margin-top:6px;text-align:left;transition:transform .15s var(--ease),box-shadow .2s;}
 .rb-recent:hover{transform:scale(1.02);box-shadow:var(--sh-2);}
 .rb-cover{border-radius:15px;box-shadow:var(--sh-1);flex:none;overflow:hidden;}
-.rb-stat{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px;text-align:left;}
+.rb-stat{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px;text-align:left;}
 .rb-stat .rb-card{padding:15px;}
 .rb-stat .lab{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#5B5570;}
 .rb-bar{height:6px;border-radius:99px;background:rgba(139,92,246,.16);overflow:hidden;margin-top:8px;}
@@ -1553,8 +1545,8 @@ init();
 .rb-search input{width:100%;height:46px;border-radius:16px;border:1px solid rgba(139,92,246,.18);background:rgba(255,255,255,.74);padding:0 14px 0 40px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;}
 .rb-search input::placeholder{color:#b3acc6;}
 .rb-chips{display:flex;gap:8px;margin-bottom:12px;overflow:auto;padding-bottom:2px;}
-.rb-chip{height:34px;padding:0 15px;border-radius:99px;font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer;background:rgba(255,255,255,.72);border:1px solid rgba(139,92,246,.18);color:#5B5570;display:inline-flex;align-items:center;box-shadow:none;transition:.2s var(--ease);}
-.rb-chip.on{background:var(--grad-primary);color:#fff;border-color:transparent;box-shadow:none;}
+.rb-chip{height:34px;padding:0 15px;border-radius:99px;font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer;background:rgba(255,255,255,.72);border:1px solid rgba(139,92,246,.18);color:#5B5570;display:inline-flex;align-items:center;box-shadow:var(--sh-1);transition:.2s var(--ease);}
+.rb-chip.on{background:var(--grad-primary);color:#fff;border-color:transparent;box-shadow:var(--sh-glow);}
 #rbDiffRow{display:flex;gap:7px;margin-bottom:14px;overflow:auto;padding-bottom:2px;}
 #songList{display:flex;flex-direction:column;gap:11px;max-width:none;width:100%;}
 .rb-scard{display:flex;align-items:center;gap:12px;padding:11px;border-radius:20px;cursor:pointer;background:rgba(255,255,255,.76);border:1px solid rgba(255,255,255,.8);backdrop-filter:blur(12px);box-shadow:var(--sh-1);transition:transform .15s var(--ease),box-shadow .2s;}
@@ -1571,8 +1563,8 @@ init();
 .rb-best .v{font-size:14px;font-weight:800;color:var(--accent1);}
 .rb-fav{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:rgba(139,92,246,.4);background:none;border:none;box-shadow:none;height:30px;padding:0;}
 .rb-fav.on{color:var(--pink);}
-.rb-pl{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;background:var(--grad-primary);box-shadow:0 4px 10px rgba(139,92,246,.2);height:40px;padding:0;}
-.rb-up{border:1.5px dashed rgba(139,92,246,.4)!important;background:rgba(255,255,255,.4)!important;justify-content:center;color:#9A93AE;font-weight:800;font-size:14px;grid-column:1/-1;}
+.rb-pl{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;background:var(--grad-primary);box-shadow:var(--sh-glow);height:40px;padding:0;}
+.rb-up{border:1.5px dashed rgba(139,92,246,.4)!important;background:rgba(255,255,255,.4)!important;justify-content:center;color:#9A93AE;font-weight:800;font-size:14px;}
 #detailScreen{justify-content:flex-start;align-items:stretch;gap:0;padding-top:16px;text-align:left;}
 .rb-dtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
 .rb-dcover{width:200px;height:200px;border-radius:28px;margin:8px auto 0;box-shadow:var(--sh-3);overflow:hidden;position:relative;}
@@ -1659,7 +1651,7 @@ init();
   #songScreen>*{max-width:1280px;}
   #songList{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important;}
   #settingsScreen .setrows{display:grid!important;grid-template-columns:1fr 1fr;gap:14px;align-items:start;max-width:880px!important;}
-  #recordsScreen>*,#statsScreen>*{max-width:1080px;} #rbRecList{display:grid!important;grid-template-columns:1fr 1fr;gap:10px;} #statsScreen .rb-rankrow{max-width:640px;} #recordsScreen .rb-rdist{max-width:600px;}
+  #recordsScreen>*,#statsScreen>*{max-width:1080px;} #rbRecList{display:grid!important;grid-template-columns:1fr 1fr;gap:10px;} #statsScreen .rb-rankrow{max-width:640px;}
   #detailScreen>*{max-width:980px;}
   /* play kept portrait, centered */
   #hud,#lifeWrap,#lanes,#pads{max-width:480px!important;margin-left:auto!important;margin-right:auto!important;}
@@ -1672,16 +1664,16 @@ init();
   .rb-homegrid{display:grid!important;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center;width:100%;margin:6px auto 0;}
   .rb-hleft{text-align:center;align-self:center;}
   .rb-hright{align-self:center;}
-  .rb-mascot{width:240px!important;height:240px!important;margin-top:64px!important;}
+  .rb-mascot{width:240px!important;height:240px!important;margin-top:0!important;}
   .rb-hero h1{font-size:48px!important;}
   .rb-hright .rb-h:first-of-type{margin-top:14px!important;}
 }
 
 /* ===================== TABLET + (>=768) shared ===================== */
 @media(min-width:768px){
-  .rb-homegrid{display:grid!important;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;align-content:center;width:100%;margin:0 auto;flex:1 1 auto;}
+  .rb-homegrid{display:grid!important;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;width:100%;margin:6px auto 0;}
   .rb-hleft{text-align:center;}
-  .rb-mascot{width:228px!important;height:228px!important;margin-top:52px!important;}
+  .rb-mascot{width:228px!important;height:228px!important;margin-top:0!important;}
   .rb-hero h1{font-size:46px!important;}
   #songList{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important;}
   #hud,#lifeWrap,#lanes,#pads{max-width:480px!important;margin-left:auto!important;margin-right:auto!important;}
@@ -1691,13 +1683,13 @@ init();
   body{align-items:center!important;justify-content:center!important;}
   #stage{width:min(760px,96vw)!important;height:min(1040px,96dvh)!important;margin-left:0!important;border-radius:34px!important;}
   #menuScreen,#songScreen,#settingsScreen,#recordsScreen,#statsScreen,#detailScreen{align-items:center!important;}
-  #menuScreen>.rb-top,#menuScreen>.rb-homegrid,#songScreen>*,#settingsScreen>*,#recordsScreen>*,#statsScreen>*,#detailScreen>*{max-width:680px;width:100%;margin-left:auto!important;margin-right:auto!important;}
+  #menuScreen>.rb-top,#menuScreen>.rb-homegrid,#songScreen>*,#settingsScreen>*,#recordsScreen>*,#statsScreen>*,#detailScreen>*{max-width:680px;margin-left:auto!important;margin-right:auto!important;}
 }
 .rb-rsum{max-width:700px;} .rb-empty{grid-column:1/-1;}
 
 /* ===== PLAY = centered portrait panel on tablet/desktop ===== */
 @media(min-width:768px){
-  body.rb-playing{justify-content:center!important;align-items:center!important;background:radial-gradient(120% 90% at 50% 115%,#2e2168 0%,#1c1545 48%,#130e30 100%)!important;}
+  body.rb-playing{justify-content:center!important;align-items:center!important;background:radial-gradient(120% 80% at 50% 120%,#241a52 0%,#15103A 45%,#0B0820 100%)!important;}
   body.rb-playing #stage{width:min(440px,94vw)!important;height:min(900px,94vh)!important;margin:0!important;border-radius:38px!important;box-shadow:0 30px 90px rgba(20,10,50,.6)!important;border:1px solid rgba(255,255,255,.08)!important;}
   body.rb-playing #rbSidebar{display:none!important;}
   body.rb-playing #hud,body.rb-playing #lifeWrap,body.rb-playing #lanes,body.rb-playing #pads{max-width:none!important;margin-left:0!important;margin-right:0!important;}
@@ -1732,56 +1724,14 @@ body{background:radial-gradient(112% 74% at 6% -6%,#E9D9FF 0%,transparent 47%),r
 .ambient i{opacity:.72!important;}
 .rb-card{background:rgba(255,255,255,.85)!important;border-color:rgba(255,255,255,.9)!important;}
 .rb-scard{background:rgba(255,255,255,.88)!important;}
-.rb-iconbtn,.rb-search input,.rb-chip:not(.on){background:rgba(255,255,255,.86)!important;}
+.rb-iconbtn,.rb-search input,.rb-chip{background:rgba(255,255,255,.86)!important;}
 .rb-recent{background:rgba(255,255,255,.85)!important;}
-.rb-stat .lab svg,.rb-lvcard .lab svg{width:16px!important;height:16px!important;flex:none!important;} .rb-stat .lab{align-items:center!important;}
-#songScreen,#settingsScreen,#recordsScreen,#statsScreen{justify-content:flex-start!important;} #detailScreen{justify-content:flex-start!important;}
-#detailScreen .rb-dgrid{margin-top:auto!important;margin-bottom:auto!important;}
-#settingsScreen,#recordsScreen,#statsScreen{align-items:center!important;}
-#settingsScreen .setrows{align-items:stretch!important;max-width:480px!important;width:100%;margin:0 auto;} .setrow{background:rgba(255,255,255,.85)!important;border:1px solid rgba(255,255,255,.9)!important;align-self:stretch!important;width:auto!important;} .setrow svg{max-width:18px;max-height:18px;} .setrow .top .val{background:rgba(139,92,246,.12)!important;}
-#settingsBackBtn{width:100%!important;max-width:480px!important;height:56px!important;border-radius:18px!important;font-size:16px!important;font-weight:800!important;margin:14px auto 0!important;}
-#settingsScreen h2{text-align:left!important;}
-.rb-lvcard{padding:15px 16px!important;}
-#recordsScreen .rb-rsum{margin-top:8px!important;padding:14px 16px!important;} #recordsScreen .rb-rgrid{gap:6px 14px!important;} #recordsScreen .rb-lvcard{margin-top:10px!important;padding:13px 16px!important;} #recordsScreen .rb-rankrow{margin-bottom:6px!important;} #recordsScreen .rb-rankrow .ba{height:8px!important;} #recordsScreen .rb-rec{padding:11px 14px!important;margin-bottom:8px!important;}
-.rb-rcols{width:100%;} #recordsScreen .rb-rsec{break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 16px;} #recordsScreen .rb-rsec .rb-rsum,#recordsScreen .rb-rsec .rb-lvcard{margin:0!important;}
-@media(min-width:1024px){#recordsScreen .rb-rcols{column-count:2;column-gap:18px;max-width:760px!important;} #recordsScreen .rb-rcols #rbRecList{display:flex!important;flex-direction:column!important;gap:8px!important;}}
-@media(min-width:768px) and (max-width:1023px){#settingsScreen .setrows{display:block!important;column-count:2;column-gap:16px;max-width:680px!important;margin-left:auto!important;margin-right:auto!important;}#settingsScreen .setrow{display:flex!important;flex-direction:column;break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 16px!important;align-self:auto!important;width:auto!important;}#settingsScreen{padding-top:48px!important;padding-bottom:108px!important;} #recordsScreen,#statsScreen{padding-bottom:110px!important;}}
-@media(min-width:1024px){#settingsScreen{padding:48px 46px 56px!important;align-items:flex-start!important;} #settingsScreen>*{margin-left:0!important;margin-right:auto!important;} #settingsScreen .setrows{display:block!important;column-count:2;column-gap:18px;max-width:920px!important;margin-left:0!important;margin-right:0!important;}#settingsScreen .setrow{display:flex!important;flex-direction:column;break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 16px!important;align-self:auto!important;width:auto!important;}}
-@media(max-width:767px){#settingsScreen,#recordsScreen,#statsScreen{align-items:stretch!important;} #settingsScreen .setrows{margin-left:0!important;margin-right:0!important;max-width:none!important;}}
-#recordsScreen>*,#statsScreen>*{width:100%;max-width:600px!important;margin-left:0!important;margin-right:auto!important;}
-body:not(.rb-playing) #lanes,body:not(.rb-playing) #pads,body:not(.rb-playing) #playMascot,body:not(.rb-playing) #hud,body:not(.rb-playing) #lifeWrap,body:not(.rb-playing) #progressWrap,body:not(.rb-playing) #combo,body:not(.rb-playing) #judge,body:not(.rb-playing) #judgeSub,body:not(.rb-playing) #countdown,body:not(.rb-playing) #pauseBtn,body:not(.rb-playing) #fx{display:none!important;}
-.overlay .ambient{display:none!important;}
-.rb-modalbg{position:fixed;inset:0;z-index:200;background:rgba(30,20,60,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;}
-.rb-modalbg.on{display:flex;}
-.rb-modal{width:100%;max-width:420px;max-height:78vh;overflow:auto;background:#fff;border-radius:24px;box-shadow:0 30px 80px rgba(40,20,90,.32);padding:22px 22px 24px;animation:rbpop .2s var(--ease);}
-@keyframes rbpop{0%{transform:scale(.94);opacity:0}100%{transform:scale(1);opacity:1}}
-.rb-modal .rb-mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.rb-modal h3{font-size:20px;font-weight:800;color:var(--ink);margin:0;}
-.rb-mclose{width:34px;height:34px;border-radius:50%;border:none;background:rgba(139,92,246,.1);color:#5B5570;font-size:14px;font-weight:800;cursor:pointer;flex:none;display:grid;place-items:center;}
-.rb-noti{display:flex;gap:12px;padding:13px 14px;border-radius:16px;background:rgba(139,92,246,.07);margin-top:10px;text-align:left;}
-.rb-noti .ic{font-size:20px;flex:none;line-height:1.3;}
-.rb-noti .t{font-size:14px;font-weight:800;color:var(--ink);}
-.rb-noti .d{font-size:12.5px;color:#7a7390;font-weight:600;margin-top:2px;line-height:1.45;}
-#rbAurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;display:none;}
-body.rb-playing #stage{position:relative;z-index:1;}
-body.rb-playing.rb-aurora #rbAurora{display:block;}
-#rbAurora i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.6;mix-blend-mode:screen;}
-#rbAurora .a1{width:48%;height:48%;background:radial-gradient(circle,#A78BFA,transparent 70%);top:-10%;left:-6%;animation:aur1 15s ease-in-out infinite;}
-#rbAurora .a2{width:52%;height:52%;background:radial-gradient(circle,#F472B6,transparent 70%);bottom:-14%;right:-8%;animation:aur2 19s ease-in-out infinite;}
-#rbAurora .a3{width:46%;height:46%;background:radial-gradient(circle,#60A5FA,transparent 70%);top:30%;left:60%;animation:aur3 17s ease-in-out infinite;}
-#rbAurora .a4{position:absolute;width:42%;height:42%;border-radius:50%;background:radial-gradient(circle,#34D399,transparent 72%);bottom:5%;left:8%;filter:blur(80px);opacity:.4;mix-blend-mode:screen;animation:aur1 21s ease-in-out infinite reverse;}
-@keyframes aur1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(28%,22%) scale(1.2)}}
-@keyframes aur2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-24%,-16%) scale(1.18)}}
-@keyframes aur3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-22%,26%) scale(1.25)}}
-#pauseBtn{top:16px!important;width:36px!important;height:36px!important;left:50%!important;transform:translateX(-50%)!important;}
-#stage:has(#tutCard:not(.hidden)) #pads{opacity:0!important;pointer-events:none!important;}
 </style>
 <script>
 (function(){
   function boot(){
     var stage=document.getElementById('stage');
     if(!stage || typeof showScreen!=='function'){ return setTimeout(boot,150); }
-    if(!document.getElementById("rbAurora"))document.body.insertAdjacentHTML("afterbegin","<div id=\"rbAurora\"><i class=\"a1\"></i><i class=\"a2\"></i><i class=\"a3\"></i><i class=\"a4\"></i></div>");
     function S(p){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>';}
     var I={
       home:S('<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>'),
@@ -1823,73 +1773,44 @@ body.rb-playing.rb-aurora #rbAurora{display:block;}
     var DASH='—';
     var menu=document.getElementById('menuScreen');
     menu.classList.add('rb-home');
-    menu.innerHTML='<div class="ambient"><i class="a"></i><i class="b"></i><i class="c"></i></div><div class="rb-top"><div class="rb-prof"><div class="rb-ava">'+CAT+'</div><div><div class="nm">리듬베르</div><div class="lv" id="rbHomeLv">Lv.1</div></div></div><div style="display:flex;gap:9px"><button class="rb-iconbtn" id="rbBell">'+I.bell+'</button></div></div><div class="rb-homegrid"><div class="rb-hcol rb-hleft"><div class="rb-hero"><h1>리듬베르</h1><div class="brand-line">Rhythm · Camembert</div><p class="sub" style="margin:18px auto 0;line-height:1.85">노트가 판정선에 닿는 순간,<br>완벽한 리듬을 만들어봐요</p></div><div class="rb-mascot"><div class="halo"></div><span class="rb-fnote" style="left:14%;top:30%;color:#A78BFA;animation-delay:-1s">♪</span><span class="rb-fnote" style="left:50%;top:10%;color:#60A5FA;animation-delay:-2.4s">♫</span><span class="rb-fnote" style="left:84%;top:26%;color:#F9A8D4;animation-delay:-3.6s">♪</span><span class="rb-fnote" style="left:30%;top:6%;color:#34D399;animation-delay:-4.8s">♩</span><span class="rb-fnote" style="left:70%;top:38%;color:#FBBF24;animation-delay:-6s">♬</span><div class="catwrap">'+CAT+'</div><div class="ring"></div></div></div><div class="rb-hcol rb-hright"><button id="toSongBtn" class="rb-bigbtn" style="margin-top:8px">'+I.play+' 곡 선택하기</button><button class="rb-tut rb-bigbtn" id="tutBtn" style="margin-top:10px">'+I.head+' 튜토리얼</button><div class="rb-h" style="margin:44px 0 16px">최근 플레이</div><div class="rb-card rb-recent" id="rbRecent"></div><div class="rb-stat"><div class="rb-card"><div class="lab" style="color:var(--pink)">'+I.trophy+'<span style="color:#5B5570">BEST RANK</span></div><div id="rbBestRank" style="font-size:30px;font-weight:800;margin-top:6px;background:var(--grad-rank);-webkit-background-clip:text;background-clip:text;color:transparent">'+DASH+'</div></div><div class="rb-card"><div class="lab" style="color:var(--accent3)">'+I.chart+'<span style="color:#5B5570">내 기록</span></div><div id="rbHomeRecs" style="font-size:30px;font-weight:800;margin-top:6px;color:var(--ink)">0</div><div id="rbHomeAvg" style="font-size:11px;color:#9A93AE;font-weight:700;margin-top:2px">평균 정확도 —</div></div></div></div></div>';
+    menu.innerHTML='<div class="ambient"><i class="a"></i><i class="b"></i><i class="c"></i></div><div class="rb-top"><div class="rb-prof"><div class="rb-ava">'+CAT+'</div><div><div class="nm">리듬베르</div></div></div><div style="display:flex;gap:9px"><button class="rb-iconbtn" id="rbBell">'+I.bell+'</button><button class="rb-iconbtn" id="toSettingsBtn">'+I.gear+'</button></div></div><div class="rb-homegrid"><div class="rb-hcol rb-hleft"><div class="rb-hero"><h1>리듬베르</h1><div class="brand-line">Rhythm · Camembert</div><p class="sub" style="margin:8px auto 0">노트가 판정선에 닿는 순간,<br>완벽한 리듬을 만들어봐요</p></div><div class="rb-mascot"><div class="halo"></div><span class="rb-fnote" style="left:18%;top:30%;color:#A78BFA;animation-delay:-1s">♪</span><span class="rb-fnote" style="left:50%;top:14%;color:#60A5FA;animation-delay:-2.4s">♫</span><span class="rb-fnote" style="left:80%;top:26%;color:#F9A8D4;animation-delay:-3.6s">♪</span><div class="catwrap">'+CAT+'</div><div class="ring"></div></div></div><div class="rb-hcol rb-hright"><button id="toSongBtn" class="rb-bigbtn" style="margin-top:8px">'+I.play+' 곡 선택하기</button><button class="rb-tut rb-bigbtn" id="tutBtn" style="margin-top:11px">'+I.head+' 튜토리얼</button><div class="rb-h" style="margin:20px 0 10px">최근 플레이</div><div class="rb-card rb-recent" id="rbRecent"></div><div class="rb-stat"><div class="rb-card"><div class="lab" style="color:var(--pink)">'+I.trophy+'<span style="color:#5B5570">BEST RANK</span></div><div id="rbBestRank" style="font-size:30px;font-weight:800;margin-top:6px;background:var(--grad-rank);-webkit-background-clip:text;background-clip:text;color:transparent">'+DASH+'</div></div><div class="rb-card"><div class="lab" style="color:var(--accent3)">'+I.chart+'<span style="color:#5B5570">내 기록</span></div><div id="rbHomeRecs" style="font-size:30px;font-weight:800;margin-top:6px;color:var(--ink)">0</div><div id="rbHomeAvg" style="font-size:11px;color:#9A93AE;font-weight:700;margin-top:2px">평균 정확도 —</div></div></div></div></div>';
     menu.querySelector('#toSongBtn').onclick=function(){try{initAudio();}catch(e){} refreshSongList(); showScreen('songScreen');};
-    var _setBtn=menu.querySelector('#toSettingsBtn');if(_setBtn)_setBtn.onclick=function(){showScreen('settingsScreen');};
+    menu.querySelector('#toSettingsBtn').onclick=function(){showScreen('settingsScreen');};
     menu.querySelector('#tutBtn').onclick=function(){startTutorial(true);};
-    var notiBg=document.createElement('div');notiBg.className='rb-modalbg';notiBg.id='rbNotiBg';
-    notiBg.innerHTML='<div class="rb-modal"><div class="rb-mhead"><h3>알림</h3><button class="rb-mclose" id="rbNotiClose">✕</button></div><div id="rbNotiList"></div></div>';
-    document.body.appendChild(notiBg);
-    var NOTIS=[{ic:'🎉',t:'리듬베르에 오신 걸 환영해요!',d:'첫 곡을 플레이하고 나만의 기록을 남겨보세요.'},{ic:'🎧',t:'튜토리얼이 준비됐어요',d:'기본 조작을 먼저 익히면 플레이가 훨씬 쉬워져요.'},{ic:'⭐',t:'새 기능 · 레벨 시스템',d:'곡을 클리어하면 XP를 얻어 레벨업할 수 있어요.'}];
-    function openNoti(){var el=notiBg.querySelector('#rbNotiList');el.innerHTML=NOTIS.length?NOTIS.map(function(n){return '<div class="rb-noti"><div class="ic">'+n.ic+'</div><div class="tx"><div class="t">'+n.t+'</div><div class="d">'+n.d+'</div></div></div>';}).join(''):'<div class="rb-empty" style="padding:24px 0">새로운 알림이 없어요.</div>';notiBg.classList.add('on');}
-    notiBg.querySelector('#rbNotiClose').onclick=function(){notiBg.classList.remove('on');};
-    notiBg.addEventListener('click',function(e){if(e.target===notiBg)notiBg.classList.remove('on');});
-    menu.querySelector('#rbBell').onclick=openNoti;
+    menu.querySelector('#rbBell').onclick=function(){refreshRecords();showScreen('recordsScreen');};
     function fillRecent(){var el=menu.querySelector('#rbRecent');if(!el)return;var rid=recents()[0],s=null,idx=0;if(rid){for(var i=0;i<SONGS.length;i++)if(SONGS[i].id===rid){s=SONGS[i];idx=i;break;}}if(!s){s=SONGS[0];idx=0;}var best=getBest(s.id,curLevel());el.innerHTML='<div class="rb-cover" style="width:54px;height:54px">'+cover(s.id)+'</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:15px">'+s.title+'</div><div style="font-size:12px;color:#9A93AE;font-weight:600">'+s.artist+' · BPM '+s.bpm+' · '+DIFFNAMES[curLevel()]+'</div></div><div class="rb-best"><div class="k">BEST</div><div class="v">'+(best?best.acc+'%':DASH)+'</div></div>';el.onclick=function(){openDetail(s,idx);};}
     function topRank(){var order=['SS','S','A','B','C','D'],bi=99,cnt=0;for(var i=0;i<SONGS.length;i++)for(var lv=1;lv<=10;lv++){var b=getBest(SONGS[i].id,lv);if(b){cnt++;var ix=order.indexOf(b.rank);if(ix>=0&&ix<bi)bi=ix;}}return {rank:bi<99?order[bi]:DASH,count:cnt};}
     function fillHomeStats(){var t=topRank();var el=menu.querySelector('#rbBestRank');if(el)el.textContent=t.rank;var rows=allBests();var rc=menu.querySelector('#rbHomeRecs');if(rc)rc.textContent=rows.length;var av=menu.querySelector('#rbHomeAvg');if(av)av.textContent='평균 정확도 '+(rows.length?Math.round(rows.reduce(function(a,r){return a+r.b.acc;},0)/rows.length)+'%':'—');}
     var song=document.getElementById('songScreen');
     song.classList.add('rb-songscr');
     var fileInput=document.getElementById('fileInput');
-    song.innerHTML='<div class="ambient"><i class="a"></i><i class="b"></i></div><div class="rb-sshead"><h2>곡 선택</h2><div style="display:flex;gap:9px"></div></div><div class="rb-search">'+I.search+'<input id="rbSearch" placeholder="곡 · 작곡가 검색"></div><div class="rb-chips" id="rbChips"><span class="rb-chip on" data-f="all">전체</span><span class="rb-chip" data-f="fav">즐겨찾기</span><span class="rb-chip" data-f="recent">최근 플레이</span></div><div id="songList"></div>';
+    song.innerHTML='<div class="ambient"><i class="a"></i><i class="b"></i></div><div class="rb-sshead"><h2>곡 선택</h2><div style="display:flex;gap:9px"><button class="rb-iconbtn" id="songBackBtn">'+I.back+'</button><button class="rb-iconbtn" id="songSettingsBtn">'+I.gear+'</button></div></div><div class="rb-search">'+I.search+'<input id="rbSearch" placeholder="곡 · 작곡가 검색"></div><div class="rb-chips" id="rbChips"><span class="rb-chip on" data-f="all">전체</span><span class="rb-chip" data-f="fav">즐겨찾기</span><span class="rb-chip" data-f="recent">최근 플레이</span></div><div id="songList"></div>';
     song.appendChild(fileInput);
-    var _songBack=song.querySelector('#songBackBtn');if(_songBack)_songBack.onclick=function(){showScreen('menuScreen');};
-    var _songSet=song.querySelector('#songSettingsBtn');if(_songSet)_songSet.onclick=function(){showScreen('settingsScreen');};
+    song.querySelector('#songBackBtn').onclick=function(){showScreen('menuScreen');};
+    song.querySelector('#songSettingsBtn').onclick=function(){showScreen('settingsScreen');};
     song.querySelector('#rbSearch').addEventListener('input',function(e){state.query=e.target.value.trim().toLowerCase();buildSongList();});
     song.querySelector('#rbChips').addEventListener('click',function(e){var c=e.target.closest('[data-f]');if(!c)return;state.filter=c.dataset.f;song.querySelectorAll('#rbChips .rb-chip').forEach(function(x){x.classList.toggle('on',x===c);});buildSongList();});
-    function buildSongList(){var list=document.getElementById('songList');if(!list)return;var favs=favSet(),rec=recents();list.innerHTML='';var items=SONGS.map(function(s,i){return {s:s,i:i};});if(state.filter==='fav')items=items.filter(function(o){return favs.has(o.s.id);});if(state.filter==='recent')items=items.filter(function(o){return rec.indexOf(o.s.id)>=0;});if(state.query)items=items.filter(function(o){return (o.s.title+' '+o.s.artist).toLowerCase().indexOf(state.query)>=0;});if(!items.length)list.innerHTML='<div class="rb-empty">조건에 맞는 곡이 없어요.</div>';items.forEach(function(o){var s=o.s,i=o.i,best=getBest(s.id,curLevel()),fav=favs.has(s.id);var card=document.createElement('div');card.className='rb-scard';card.innerHTML='<div class="cv">'+cover(s.id)+'</div><div class="mt"><div class="t">'+s.title+'</div><div class="d">'+s.artist+' · BPM '+s.bpm+'</div>'+starHTML(starN(s.bpm))+'</div><button class="rb-fav'+(fav?' on':'')+'" data-fav>'+I.heart+'</button><div class="rb-best"><div class="k">BEST</div><div class="v">'+(best?best.acc+'%':DASH)+'</div></div><button class="rb-pl">'+I.play+'</button>';card.querySelector('[data-fav]').onclick=function(ev){ev.stopPropagation();var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);buildSongList();};card.onclick=function(){openDetail(s,i);};list.appendChild(card);});if(state.filter==='all'){var up=document.createElement('div');up.className='rb-scard rb-up';up.textContent='＋ 내 음악 파일 추가 (mp3 등)';up.onclick=function(){fileInput.click();};list.appendChild(up);}}
+    function buildSongList(){var list=document.getElementById('songList');if(!list)return;var favs=favSet(),rec=recents();list.innerHTML='';var items=SONGS.map(function(s,i){return {s:s,i:i};});if(state.filter==='fav')items=items.filter(function(o){return favs.has(o.s.id);});if(state.filter==='recent')items=items.filter(function(o){return rec.indexOf(o.s.id)>=0;});if(state.query)items=items.filter(function(o){return (o.s.title+' '+o.s.artist).toLowerCase().indexOf(state.query)>=0;});if(!items.length)list.innerHTML='<div class="rb-empty">조건에 맞는 곡이 없어요.</div>';items.forEach(function(o){var s=o.s,i=o.i,best=getBest(s.id,curLevel()),fav=favs.has(s.id);var card=document.createElement('div');card.className='rb-scard';card.innerHTML='<div class="cv">'+cover(s.id)+'</div><div class="mt"><div class="t">'+s.title+'</div><div class="d">'+s.artist+' · BPM '+s.bpm+'</div>'+starHTML(starN(s.bpm))+'</div><button class="rb-fav'+(fav?' on':'')+'" data-fav>'+I.heart+'</button><div class="rb-best"><div class="k">BEST</div><div class="v">'+(best?best.acc+'%':DASH)+'</div></div><button class="rb-pl">'+I.play+'</button>';card.querySelector('[data-fav]').onclick=function(ev){ev.stopPropagation();var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);buildSongList();};card.onclick=function(){openDetail(s,i);};list.appendChild(card);});var up=document.createElement('div');up.className='rb-scard rb-up';up.textContent='＋ 내 음악 파일 추가 (mp3 등)';up.onclick=function(){fileInput.click();};list.appendChild(up);}
     var detail=document.createElement('div');detail.className='overlay hidden';detail.id='detailScreen';stage.appendChild(detail);
-    function openDetail(s,i){selected={s:s,i:i};var fav=favSet().has(s.id);detail.innerHTML='<div class="ambient"><i class="a"></i><i class="c"></i></div><div class="rb-dtop"><button class="rb-iconbtn" id="dBack">'+I.back+'</button><button class="rb-iconbtn'+(fav?' on':'')+'" id="dFav" style="'+(fav?'color:var(--pink)':'')+'">'+I.heart+'</button></div><div class="rb-dgrid"><div class="rb-dleft"><div class="rb-dcover">'+cover(s.id)+'</div></div><div class="rb-dright"><div class="rb-dtitle"><h2>'+s.title+'</h2><div class="rb-dmeta"><span>'+s.artist+'</span><span>·</span><span>BPM '+s.bpm+'</span></div></div><div class="rb-h" style="margin:28px 0 14px">난이도</div><div class="rb-ddiff" id="dDiff"></div><div class="rb-h" style="margin:30px 0 14px">기록</div><div class="rb-dstats" id="dStats"></div><button id="dStart" class="rb-bigbtn" style="margin-top:32px">'+I.play+' 게임 시작</button></div></div>';detail.querySelector('#dBack').onclick=function(){showScreen('songScreen');};detail.querySelector('#dFav').onclick=function(){var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);openDetail(s,i);};detail.querySelector('#dStart').onclick=function(){try{initAudio();}catch(e){} curSong=s; startGame();};paintDetailDiff();paintDetailStats();showScreen('detailScreen');}
+    function openDetail(s,i){selected={s:s,i:i};var fav=favSet().has(s.id);detail.innerHTML='<div class="ambient"><i class="a"></i><i class="c"></i></div><div class="rb-dtop"><button class="rb-iconbtn" id="dBack">'+I.back+'</button><button class="rb-iconbtn'+(fav?' on':'')+'" id="dFav" style="'+(fav?'color:var(--pink)':'')+'">'+I.heart+'</button></div><div class="rb-dgrid"><div class="rb-dleft"><div class="rb-dcover">'+cover(s.id)+'</div></div><div class="rb-dright"><div class="rb-dtitle"><h2>'+s.title+'</h2><div class="rb-dmeta"><span>'+s.artist+'</span><span>·</span><span>BPM '+s.bpm+'</span></div></div><div class="rb-h" style="margin:18px 0 8px">난이도</div><div class="rb-ddiff" id="dDiff"></div><div class="rb-h" style="margin:18px 0 8px">기록</div><div class="rb-dstats" id="dStats"></div><button id="dStart" class="rb-bigbtn" style="margin-top:20px">'+I.play+' 게임 시작</button></div></div>';detail.querySelector('#dBack').onclick=function(){showScreen('songScreen');};detail.querySelector('#dFav').onclick=function(){var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);openDetail(s,i);};detail.querySelector('#dStart').onclick=function(){try{initAudio();}catch(e){} curSong=s; startGame();};paintDetailDiff();paintDetailStats();showScreen('detailScreen');}
     function paintDetailDiff(){var h=detail.querySelector('#dDiff');if(!h)return;h.innerHTML='';for(var lv=1;lv<=10;lv++){var p=document.createElement('div');p.className='p '+DIFFCLS[lv]+(lv===curLevel()?' sel':'');p.dataset.d=lv;p.innerHTML=lv+'<small>'+DIFFNAMES[lv]+'</small>';h.appendChild(p);}h.onclick=function(e){var p=e.target.closest('[data-d]');if(!p)return;level=parseInt(p.dataset.d,10);paintDetailDiff();paintDetailStats();};}
     function paintDetailStats(){var h=detail.querySelector('#dStats');if(!h)return;var b=getBest(selected.s.id,curLevel());h.innerHTML='<div class="rb-card"><div class="k">BEST</div><div class="v acc">'+(b?b.acc+'%':DASH)+'</div></div><div class="rb-card"><div class="k">MAX COMBO</div><div class="v">'+(b?b.combo:DASH)+'</div></div><div class="rb-card"><div class="k">RANK</div><div class="v">'+(b?b.rank:DASH)+'</div></div>';}
     var records=document.createElement('div');records.className='overlay hidden';records.id='recordsScreen';stage.appendChild(records);
     function allBests(){var rows=[];for(var i=0;i<SONGS.length;i++)for(var lv=1;lv<=10;lv++){var b=getBest(SONGS[i].id,lv);if(b)rows.push({s:SONGS[i],lv:lv,b:b});}return rows;}
-    function refreshRecords(){
-      var rows=allBests().sort(function(a,b){return b.b.score-a.b.score;});
-      var t=topRank();
-      var avg=rows.length?Math.round(rows.reduce(function(a,r){return a+r.b.acc;},0)/rows.length):0;
-      var fc=rows.filter(function(r){return r.b.fc||r.b.ap;}).length;
-      var apc=rows.filter(function(r){return r.b.ap;}).length;
-      var maxCb=rows.reduce(function(m,r){return Math.max(m,r.b.combo||0);},0);
-      var li=(typeof rbLevelInfo==='function')?rbLevelInfo():{level:1,cur:0,need:1};
-      var lpct=Math.max(0,Math.min(100,Math.round(li.cur/li.need*100)));
-      var ranks=['SS','S','A','B','C','D'],tally={};ranks.forEach(function(r){tally[r]=0;});
-      rows.forEach(function(r){if(tally[r.b.rank]!=null)tally[r.b.rank]++;});
-      var maxc=Math.max(1,Math.max.apply(null,ranks.map(function(r){return tally[r];})));
-      var bars=ranks.map(function(r){return '<div class="rb-rankrow"><span class="lb">'+r+'</span><span class="ba"><i style="width:'+(tally[r]/maxc*100)+'%"></i></span><span class="ct">'+tally[r]+'</span></div>';}).join('');
-      records.innerHTML=
-        '<div class="rb-sshead" style="margin-bottom:4px"><h2>기록</h2></div><div class="rb-rcols"><div class="rb-rsec">'+
-        '<div class="rb-card rb-rsum"><div style="text-align:center"><div class="rk">'+t.rank+'</div><div style="font-size:10px;color:#9A93AE;font-weight:800">BEST RANK</div></div><div class="rb-rgrid"><div><div class="k">총 기록</div><div class="v">'+rows.length+'</div></div><div><div class="k">평균 정확도</div><div class="v">'+(rows.length?avg+'%':DASH)+'</div></div><div><div class="k">풀콤보</div><div class="v">'+fc+'</div></div><div><div class="k">올퍼펙트</div><div class="v">'+apc+'</div></div><div><div class="k">최고 콤보</div><div class="v">'+(maxCb||DASH)+'</div></div><div><div class="k">플레이 곡</div><div class="v">'+SONGS.length+'</div></div></div></div>'+
-        '</div><div class="rb-rsec"><div class="rb-card rb-lvcard"><div class="lab" style="color:var(--accent1);display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800">'+I.score+'<span style="color:#5B5570">플레이어 레벨</span></div><div style="display:flex;align-items:baseline;gap:8px;margin-top:5px"><div style="font-size:26px;font-weight:800;color:var(--ink)">Lv.'+li.level+'</div><div style="font-size:12px;color:#9A93AE;font-weight:700">'+lpct+'%</div></div><div class="rb-bar"><i style="width:'+lpct+'%"></i></div></div>'+
-        '</div><div class="rb-rsec"><div class="rb-h" style="margin:0 0 9px;padding-left:16px">랭크 분포</div><div class="rb-rdist" style="padding-left:16px">'+(rows.length?bars:'<div class="rb-empty">아직 기록이 없어요.</div>')+'</div>'+
-        '</div><div class="rb-rsec"><div class="rb-h" style="margin:0 0 9px;padding-left:16px">베스트 스코어</div><div id="rbRecList"></div></div></div>';
-      var rl=records.querySelector('#rbRecList');
-      if(!rows.length){rl.innerHTML='<div class="rb-empty">아직 기록이 없어요.<br>곡을 플레이하면 여기에 쌓입니다.</div>';return;}
-      rows.forEach(function(r){var d=document.createElement('div');d.className='rb-card rb-rec';d.innerHTML='<div class="rb-cover" style="width:46px;height:46px;flex:none">'+cover(r.s.id)+'</div><div class="mt"><div class="t">'+r.s.title+'</div><div class="d">Lv.'+r.lv+' '+DIFFNAMES[r.lv]+' · '+r.b.score+(r.b.ap?' · <b style="color:var(--pink)">AP</b>':(r.b.fc?' · <b style="color:var(--accent1)">FC</b>':''))+'</div></div><div style="text-align:right;flex:none;min-width:46px"><div style="font-size:18px;font-weight:800;color:var(--accent1);line-height:1.1">'+r.b.rank+'</div><div style="font-size:12px;font-weight:800;color:#9A93AE">'+r.b.acc+'%</div></div>';rl.appendChild(d);});
-    }
+    function refreshRecords(){var rows=allBests().sort(function(a,b){return b.b.score-a.b.score;});var t=topRank();var avg=rows.length?Math.round(rows.reduce(function(a,r){return a+r.b.acc;},0)/rows.length):0;var fc=rows.filter(function(r){return r.b.fc||r.b.ap;}).length;records.innerHTML='<div class="rb-sshead" style="margin-bottom:4px"><h2>기록</h2></div><div class="rb-card rb-rsum"><div style="text-align:center"><div class="rk">'+t.rank+'</div><div style="font-size:10px;color:#9A93AE;font-weight:800">BEST RANK</div></div><div class="rb-rgrid"><div><div class="k">기록 수</div><div class="v">'+rows.length+'</div></div><div><div class="k">평균 정확도</div><div class="v">'+(rows.length?avg+'%':DASH)+'</div></div><div><div class="k">풀콤보</div><div class="v">'+fc+'</div></div><div><div class="k">플레이 곡</div><div class="v">'+SONGS.length+'</div></div></div></div><div class="rb-h" style="margin:6px 0 10px">베스트 스코어</div><div id="rbRecList"></div>';var rl=records.querySelector('#rbRecList');if(!rows.length){rl.innerHTML='<div class="rb-empty">아직 기록이 없어요.<br>곡을 플레이하면 여기에 쌓입니다.</div>';return;}rows.forEach(function(r){var d=document.createElement('div');d.className='rb-card rb-rec';d.innerHTML='<div class="rk">'+r.b.rank+'</div><div class="mt"><div class="t">'+r.s.title+'</div><div class="d">Lv.'+r.lv+' '+DIFFNAMES[r.lv]+' · '+r.b.score+'</div></div><div class="ac">'+r.b.acc+'%</div>';rl.appendChild(d);});}
     window.refreshRecords=refreshRecords;
     var stats=document.createElement('div');stats.className='overlay hidden';stats.id='statsScreen';stage.appendChild(stats);
     function refreshStats(){var rows=allBests();var t=topRank();var avg=rows.length?Math.round(rows.reduce(function(a,r){return a+r.b.acc;},0)/rows.length):0;var fc=rows.filter(function(r){return r.b.fc||r.b.ap;}).length;var ranks=['SS','S','A','B','C','D'],tally={};ranks.forEach(function(r){tally[r]=0;});rows.forEach(function(r){if(tally[r.b.rank]!=null)tally[r.b.rank]++;});var maxc=Math.max(1,Math.max.apply(null,ranks.map(function(r){return tally[r];})));var bars=ranks.map(function(r){return '<div class="rb-rankrow"><span class="lb">'+r+'</span><span class="ba"><i style="width:'+(tally[r]/maxc*100)+'%"></i></span><span class="ct">'+tally[r]+'</span></div>';}).join('');stats.innerHTML='<div class="rb-sshead" style="margin-bottom:4px"><h2>성적</h2></div><div class="rb-card rb-rsum"><div style="text-align:center"><div class="rk">'+t.rank+'</div><div style="font-size:10px;color:#9A93AE;font-weight:800">BEST RANK</div></div><div class="rb-rgrid"><div><div class="k">평균 정확도</div><div class="v">'+(rows.length?avg+'%':DASH)+'</div></div><div><div class="k">총 기록</div><div class="v">'+rows.length+'</div></div><div><div class="k">풀콤보</div><div class="v">'+fc+'</div></div><div><div class="k">플레이 곡</div><div class="v">'+SONGS.length+'</div></div></div></div><div class="rb-h" style="margin:6px 0 12px">랭크 분포</div>'+(rows.length?bars:'<div class="rb-empty">아직 성적이 없어요.<br>곡을 클리어해보세요.</div>');}
     var tabbar=document.createElement('nav');tabbar.id='tabbar';
-    var TABS=[['home','홈',I.home],['song','곡 선택',I.music],['rec','기록',I.chart],['set','설정',I.gear]];
+    var TABS=[['home','홈',I.home],['song','곡 선택',I.music],['rec','기록',I.chart],['grade','성적',I.score],['set','설정',I.gear]];
     tabbar.innerHTML=TABS.map(function(t){return '<button class="tabbtn" data-k="'+t[0]+'">'+t[2]+'<span>'+t[1]+'</span></button>';}).join('');
     stage.appendChild(tabbar);
     var SBI='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h2v3H2zM6 14h2v6H6zM10 11h2v9h-2zM14 8h2v12h-2zM18 5h2v15h-2z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8.5C5 6 8.4 4.7 12 4.7S19 6 22 8.5"/><path d="M5 12c2-1.7 4.4-2.6 7-2.6s5 .9 7 2.6"/><path d="M8.5 15.5c1-.8 2.2-1.3 3.5-1.3s2.5.5 3.5 1.3"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 26 14"><rect x="1" y="1" width="20" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="3" y="3" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor"/></svg>';
     var statusEl=document.createElement('div');statusEl.id='rbStatus';statusEl.innerHTML='<span>9:41</span><span class="r">'+SBI+'</span>';stage.appendChild(statusEl);
     var LIGHT={menuScreen:1,songScreen:1,settingsScreen:1,recordsScreen:1,statsScreen:1,detailScreen:1,calibScreen:1};
     var sb=document.createElement('aside');sb.id='rbSidebar';
-    var SNAV=[['home','홈',I.home],['song','곡 선택',I.music],['rec','기록',I.chart],['set','설정',I.gear],['tut','튜토리얼',I.head]];
-    sb.innerHTML='<div class="rb-sbrand"><div class="lg">'+I.music+'</div><div><h3>리듬베르</h3><p>Rhythm Camembert</p></div></div>'+SNAV.map(function(t){return '<button class="rb-nav" data-k="'+t[0]+'">'+t[2]+'<span>'+t[1]+'</span></button>';}).join('')+'<div class="rb-sprofile"><div class="av">'+CAT+'</div><div style="flex:1"><div style="font-weight:800;font-size:13.5px">리듬베르 <span id="rbSideLv" style="color:#8B5CF6;font-size:11.5px">Lv.1</span></div><div class="lvbar"><i id="rbSideXp"></i></div></div></div>';
+    var SNAV=[['home','홈',I.home],['song','곡 선택',I.music],['rec','기록',I.chart],['grade','성적',I.score],['set','설정',I.gear],['tut','튜토리얼',I.head]];
+    sb.innerHTML='<div class="rb-sbrand"><div class="lg">'+I.music+'</div><div><h3>리듬베르</h3><p>Rhythm Camembert</p></div></div>'+SNAV.map(function(t){return '<button class="rb-nav" data-k="'+t[0]+'">'+t[2]+'<span>'+t[1]+'</span></button>';}).join('')+'<div class="rb-sprofile"><div class="av">'+CAT+'</div><div style="flex:1"><div style="font-weight:800;font-size:13.5px">리듬베르</div><div style="font-size:11px;color:#9A93AE;font-weight:700">Rhythm Camembert</div></div></div>';
     document.body.appendChild(sb);
     sb.addEventListener('click',function(e){var b=e.target.closest('.rb-nav');if(!b)return;var k=b.dataset.k;
       if(k==='home')showScreen('menuScreen');
@@ -1902,20 +1823,14 @@ body.rb-playing.rb-aurora #rbAurora{display:block;}
     tabbar.addEventListener('click',function(e){var b=e.target.closest('.tabbtn');if(!b)return;var k=b.dataset.k;if(k==='home')showScreen('menuScreen');else if(k==='song'){try{initAudio();}catch(x){}refreshSongList();showScreen('songScreen');}else if(k==='rec'){refreshRecords();showScreen('recordsScreen');}else if(k==='grade'){refreshStats();showScreen('statsScreen');}else if(k==='set')showScreen('settingsScreen');});
     function updateTab(id){var k=TABMAP[id];tabbar.classList.toggle('hidden',!k);tabbar.querySelectorAll('.tabbtn').forEach(function(b){b.classList.toggle('on',b.dataset.k===k);});sb.querySelectorAll('.rb-nav').forEach(function(b){b.classList.toggle('on',b.dataset.k===k);});}
     hideAllOverlays=function(){stage.querySelectorAll('.overlay').forEach(function(o){o.classList.add('hidden');});};
-    function rbGetXp(){try{return parseInt(localStorage.getItem('rc_xp')||'0',10)||0;}catch(e){return 0;}}
-    function rbSetXp(v){try{localStorage.setItem('rc_xp',String(v));}catch(e){}}
-    function rbXpNeed(lv){return 300+(lv-1)*200;}
-    function rbLevelInfo(){var xp=rbGetXp(),lv=1,need=rbXpNeed(1);while(xp>=need&&lv<999){xp-=need;lv++;need=rbXpNeed(lv);}return {level:lv,cur:xp,need:need};}
-    function rbRenderLevel(){var li=rbLevelInfo();var pct=Math.max(0,Math.min(100,Math.round(li.cur/li.need*100)));var hl=document.getElementById('rbHomeLv');if(hl)hl.textContent='Lv.'+li.level+' · '+pct+'%';var sl=document.getElementById('rbSideLv');if(sl)sl.textContent='Lv.'+li.level;var sx=document.getElementById('rbSideXp');if(sx)sx.style.width=pct+'%';}
-    if(typeof finish==='function'){var _rbFinish=finish;finish=function(isFail){_rbFinish.apply(this,arguments);try{if(!isFail){var before=rbLevelInfo().level;var gained=Math.max(15,Math.round(score/60+accuracy()*40+(typeof level!=='undefined'?level:1)*8));rbSetXp(rbGetXp()+gained);var after=rbLevelInfo();rbRenderLevel();var rn=document.getElementById('rNew');if(rn)rn.insertAdjacentHTML('beforeend','<div class="rb-xpgain">+'+gained+' XP'+(after.level>before?' · <b>LEVEL UP!</b> Lv.'+after.level:'')+'</div>');}}catch(e){}};}
     var _show=showScreen;
-    showScreen=function(id){_show(id);if(id==='songScreen'||id==='menuScreen'){fillHomeStats();}rbRenderLevel();updateTab(id);statusEl.classList.toggle('on',!!LIGHT[id]);document.body.classList.toggle('rb-playing',id==='resultScreen');try{if(['menuScreen','songScreen','recordsScreen','statsScreen','settingsScreen'].indexOf(id)>=0)localStorage.setItem('rc_screen',id);}catch(e){}};
+    showScreen=function(id){_show(id);if(id==='songScreen'||id==='menuScreen'){fillHomeStats();}updateTab(id);statusEl.classList.toggle('on',!!LIGHT[id]);document.body.classList.toggle('rb-playing',id==='resultScreen');};
     refreshSongList=function(){buildSongList();};
     var _start=startGame;
     startGame=function(){pushRecent();tabbar.classList.add('hidden');statusEl.classList.remove('on');document.body.classList.add('rb-playing');return _start.apply(this,arguments);};
     var _tut=startTutorial;
     startTutorial=function(){tabbar.classList.add('hidden');statusEl.classList.remove('on');document.body.classList.add('rb-playing');return _tut.apply(this,arguments);};
-    fillRecent();fillHomeStats();rbRenderLevel();updateTab('menuScreen');statusEl.classList.add('on');var _pm=document.getElementById('playMascot');if(_pm)_pm.innerHTML=CAT;
+    fillRecent();fillHomeStats();updateTab('menuScreen');statusEl.classList.add('on');var _pm=document.getElementById('playMascot');if(_pm)_pm.innerHTML=CAT;
     var orient=(function(){try{return localStorage.getItem('rc_orient')||'portrait';}catch(e){return 'portrait';}})();
     if(orient==='landscape')document.body.classList.add('rb-land');
     var sr=document.querySelector('#settingsScreen .setrows');
@@ -1928,7 +1843,6 @@ body.rb-playing.rb-aurora #rbAurora{display:block;}
       var lrow=document.createElement('div');lrow.className='setrow';
       lrow.innerHTML='<div class="top"><span>레인 스타일</span></div><div class="seg" id="rbLane"><div class="lay'+(laneStyle==='3d'?' sel':'')+'" data-v="3d">입체</div><div class="lay'+(laneStyle==='flat'?' sel':'')+'" data-v="flat">평면</div></div><div class="legend">3D 원근 또는 평면 레인을 선택하세요.</div>';
       sr.appendChild(lrow);
-      var aurora=(function(){try{return localStorage.getItem("rc_aurora")!=="0";}catch(e){return true;}})();if(aurora)document.body.classList.add("rb-aurora");var arow=document.createElement("div");arow.className="setrow";arow.innerHTML='<div class="top"><span>배경 오로라 효과</span><span class="toggle'+(aurora?" on":"")+'" id="rbAur"></span></div><div class="legend">플레이 중 배경에 움직이는 오로라 빛을 켜고 끕니다.</div>';sr.appendChild(arow);arow.querySelector("#rbAur").addEventListener("click",function(){aurora=!aurora;this.classList.toggle("on",aurora);try{localStorage.setItem("rc_aurora",aurora?"1":"0");}catch(e){}document.body.classList.toggle("rb-aurora",aurora);});
       lrow.querySelector('#rbLane').addEventListener('click',function(ev){var l=ev.target.closest('[data-v]');if(!l)return;laneStyle=l.dataset.v;try{localStorage.setItem('rc_lane',laneStyle);}catch(e){}lrow.querySelectorAll('.lay').forEach(function(x){x.classList.toggle('sel',x===l);});document.body.classList.toggle('rb-flat',laneStyle==='flat');});
       var customKeys=(function(){try{var v=JSON.parse(localStorage.getItem('rc_customkeys'));return (v&&v.length===4)?v:['KeyD','KeyF','KeyJ','KeyK'];}catch(e){return ['KeyD','KeyF','KeyJ','KeyK'];}})();
       var useCustom=(function(){try{return localStorage.getItem('rc_usecustom')==='1';}catch(e){return false;}})();
@@ -1939,18 +1853,16 @@ body.rb-playing.rb-aurora #rbAurora{display:block;}
       var krow=document.createElement('div');krow.className='setrow';
       krow.innerHTML='<div class="top"><span>키 직접 지정</span><span class="val" id="rbCustomState"></span></div><div class="seg" id="rbKeyCap"></div><div class="legend">각 칸을 누른 뒤 원하는 키를 누르면 그 레인에 지정돼요. (프리셋과 별개)</div>';
       sr.appendChild(krow);
-      var xrow=document.createElement("div");xrow.className="setrow";xrow.innerHTML='<div class="top"><span>데이터 초기화</span></div><button id="rbReset" style="background:linear-gradient(135deg,#FB7185,#EC4899)!important;box-shadow:0 8px 20px rgba(236,72,153,.35)!important;height:50px!important;font-size:14.5px!important;border-radius:15px!important;margin-top:6px">전체 초기화</button><div class="legend">기록·설정·키 지정·즐겨찾기를 모두 지우고 처음 상태로 되돌립니다.</div>';sr.appendChild(xrow);xrow.querySelector("#rbReset").addEventListener("click",function(){if(!confirm("정말 전체 초기화할까요?\n모든 기록·설정·즐겨찾기가 삭제되며 되돌릴 수 없습니다."))return;try{var ks=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("rc_")===0)ks.push(k);}ks.forEach(function(k){localStorage.removeItem(k);});}catch(e){}location.reload();});
       function rbState(){var el=krow.querySelector('#rbCustomState');if(el){el.textContent=useCustom?'사용 중':'미사용';}}
       function renderCaps(){var c=krow.querySelector('#rbKeyCap');if(!c)return;c.innerHTML='';for(var i=0;i<4;i++){(function(i){var b=document.createElement('div');b.className='lay';b.style.cssText='flex:1;text-align:center;line-height:1.25;cursor:pointer;';b.innerHTML='<div style="font-size:9px;color:#9A93AE;font-weight:700">레인 '+(i+1)+'</div><div class="kk" style="font-size:16px;font-weight:800">'+kdisp(customKeys[i])+'</div>';b.onclick=function(){capKey(i,b);};c.appendChild(b);})(i);}}
       function capKey(idx,b){b.querySelector('.kk').textContent='?';b.classList.add('sel');var h=function(ev){if(ev.code==='Escape'){window.removeEventListener('keydown',h,true);renderCaps();return;}ev.preventDefault();ev.stopPropagation();customKeys[idx]=ev.code;try{localStorage.setItem('rc_customkeys',JSON.stringify(customKeys));}catch(e){}useCustom=true;try{localStorage.setItem('rc_usecustom','1');}catch(e){}applyCustom();window.removeEventListener('keydown',h,true);renderCaps();rbState();};window.addEventListener('keydown',h,true);}
       renderCaps();rbState();
       var lrEl=document.getElementById('layoutRow');if(lrEl){lrEl.addEventListener('click',function(ev){if(ev.target.closest('.lay')){useCustom=false;try{localStorage.setItem('rc_usecustom','0');}catch(e){}rbState();}});}
       }
-      try{var _ls=localStorage.getItem('rc_screen');if(_ls&&_ls!=='menuScreen'&&document.getElementById(_ls)){if(_ls==='songScreen')refreshSongList();else if(_ls==='recordsScreen')refreshRecords();else if(_ls==='statsScreen')refreshStats();showScreen(_ls);}}catch(e){}
   }
   if(document.readyState==='complete') boot(); else window.addEventListener('load',boot);
 })();
 </script>
 
-</body>
+<script>(function(){function start(){function clr(){var n=document.querySelectorAll('.note');for(var k=0;k<n.length;k++)n[k].remove();}var seq=[['1) Home',function(){clr();document.body.classList.remove('rb-playing');showScreen('menuScreen');}],['2) Song',function(){clr();document.body.classList.remove('rb-playing');try{refreshSongList();}catch(e){}showScreen('songScreen');}],['3) Detail',function(){clr();document.body.classList.remove('rb-playing');try{refreshSongList();}catch(e){}var c=document.querySelector('#songList .rb-scard:not(.rb-up)');if(c)c.click();}]];var b=document.createElement('div');b.style.cssText='position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:99999;background:rgba(17,12,40,.92);color:#fff;padding:8px 18px;border-radius:99px;font:800 14px Pretendard';document.body.appendChild(b);var i=0;function run(){try{seq[i][1]();}catch(e){}b.textContent='POINT '+seq[i][0];i=(i+1)%seq.length;}run();setInterval(run,3000);}setTimeout(start,500);})();</script></body>
 </html>
