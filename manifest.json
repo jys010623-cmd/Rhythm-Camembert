@@ -5,7 +5,7 @@
   "start_url": "./rhythm-game.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
+  "orientation": "portrait",
   "background_color": "#160f2c",
   "theme_color": "#8B5CF6",
   "lang": "ko",

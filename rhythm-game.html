@@ -503,7 +503,6 @@
         </div>
       </div>
     </div>
-    <button id="settingsBackBtn">완료</button>
   </div>
 
   <!-- calibration -->
@@ -1647,7 +1646,6 @@ $('#toSongBtn').addEventListener('click',()=>{ initAudio(); refreshSongList(); s
 $('#toSettingsBtn').addEventListener('click',()=>showScreen('settingsScreen'));
 $('#songBackBtn').addEventListener('click',()=>showScreen('menuScreen'));
 $('#songSettingsBtn').addEventListener('click',()=>showScreen('settingsScreen'));
-$('#settingsBackBtn').addEventListener('click',()=>showScreen('menuScreen'));
 $('#resumeBtn').addEventListener('click',resumeGame);
 $('#restartBtn').addEventListener('click',()=>{ $('#pauseScreen').classList.add('hidden'); stopMusic(); startGame(); });
 $('#quitBtn').addEventListener('click',quitToSongs);
@@ -2008,7 +2006,8 @@ init();
 .rb-nav svg{width:20px;height:20px;flex:none;}
 .rb-nav:hover{background:rgba(139,92,246,.08);color:var(--accent1);transform:none;}
 .rb-nav.on{background:var(--grad-primary);color:#fff;box-shadow:var(--sh-glow);}
-.rb-sprofile{margin-top:auto;display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.7);border:1px solid rgba(139,92,246,.16);border-radius:18px;padding:12px;box-shadow:var(--sh-1);}
+.rb-sprofile{margin-top:auto;display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.7);border:1px solid rgba(139,92,246,.16);border-radius:18px;padding:12px;box-shadow:var(--sh-1);cursor:pointer;transition:transform .15s var(--ease),box-shadow .2s,border-color .2s;}
+.rb-sprofile:hover{transform:translateY(-1px);box-shadow:var(--sh-2);border-color:rgba(139,92,246,.35);}
 .rb-sprofile .av{width:40px;height:40px;border-radius:12px;overflow:hidden;background:var(--grad-soft);flex:none;}
 .rb-sprofile .lvbar{height:6px;border-radius:99px;background:rgba(139,92,246,.16);overflow:hidden;margin-top:6px;}
 .rb-sprofile .lvbar>i{display:block;height:100%;width:40%;background:var(--grad-primary);border-radius:99px;}
@@ -2260,6 +2259,26 @@ body.fever-on #hitline{box-shadow:0 0 26px rgba(251,191,36,.95)!important;}
 .rb-ach .ic{font-size:22px;flex:none;}
 .rb-ach .t{font-size:13px;font-weight:800;color:var(--ink);}
 .rb-ach .d{font-size:11px;color:#9A93AE;font-weight:600;margin-top:1px;}
+/* ---- 마이페이지 ---- */
+#myScreen{text-align:left;justify-content:flex-start;align-items:stretch;padding-bottom:96px;}
+#myScreen>*{width:100%;max-width:520px;margin:0 auto;}
+.rb-mycard{display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.72);border:1px solid rgba(139,92,246,.16);border-radius:20px;padding:18px;box-shadow:var(--sh-1);margin-bottom:14px;}
+.rb-myav{width:64px;height:64px;border-radius:18px;overflow:hidden;background:var(--grad-soft);flex:none;box-shadow:var(--sh-2);}
+.rb-myinfo{flex:1;min-width:0;}
+.rb-myinfo .nm{font-size:18px;font-weight:800;color:var(--ink);}
+.rb-myinfo .lv{font-size:12.5px;font-weight:700;color:#8B5CF6;margin-top:2px;}
+.rb-mylvbar{height:8px;border-radius:99px;background:rgba(139,92,246,.16);overflow:hidden;margin-top:9px;}
+.rb-mylvbar>i{display:block;height:100%;background:var(--grad-primary);border-radius:99px;transition:width .45s var(--ease);}
+.rb-mystats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.rb-mystats .rb-card{padding:14px 12px;text-align:center;border-radius:16px;}
+.rb-mystats .k{font-size:10px;font-weight:800;letter-spacing:.04em;color:#9A93AE;}
+.rb-mystats .v{font-size:22px;font-weight:800;color:var(--ink);margin-top:5px;}
+.rb-mystats .v.rank{background:var(--grad-rank);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.rb-myach{display:flex;align-items:center;justify-content:space-between;width:100%;padding:16px 18px;border-radius:16px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.18);color:var(--ink);font-weight:800;font-size:15px;cursor:pointer;box-shadow:none;height:auto;}
+.rb-myach:hover{background:rgba(139,92,246,.13);}
+.rb-myach:active{transform:scale(.99);}
+.rb-myach .r{color:var(--accent1);font-size:14px;}
+@media(min-width:1024px){#myScreen{align-items:flex-start!important;padding:48px 46px 60px!important;} #myScreen>*{margin-left:0!important;margin-right:auto!important;max-width:560px;}}
 #rbAchToast{position:fixed;left:50%;top:24px;transform:translateX(-50%) translateY(-20px);z-index:60;display:flex;flex-direction:column;gap:8px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
 #rbAchToast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 .rb-achtoast{display:flex;gap:10px;align-items:center;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;padding:11px 16px;border-radius:14px;box-shadow:0 12px 30px rgba(124,58,237,.4);}
@@ -2419,6 +2438,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     notiBg.querySelector('#rbNotiClose').onclick=function(){notiBg.classList.remove('on');};
     notiBg.addEventListener('click',function(e){if(e.target===notiBg)notiBg.classList.remove('on');});
     menu.querySelector('#rbBell').onclick=openNoti;
+    (function(){var mp=menu.querySelector('.rb-prof');if(mp){mp.style.cursor='pointer';mp.title='마이페이지';mp.addEventListener('click',function(){if(window.refreshMy)window.refreshMy();showScreen('myScreen');});}})();
     function fillRecent(){var el=menu.querySelector('#rbRecent');if(!el)return;var rid=recents()[0],s=null,idx=0;if(rid){for(var i=0;i<SONGS.length;i++)if(SONGS[i].id===rid){s=SONGS[i];idx=i;break;}}if(!s){s=SONGS[0];idx=0;}var best=bestAny(s.id);el.innerHTML='<div class="rb-cover" style="width:54px;height:54px">'+cover(s.id)+'</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:15px">'+s.title+'</div><div style="font-size:12px;color:#9A93AE;font-weight:600">'+s.artist+' · BPM '+s.bpm+' · '+DIFFNAMES[curLevel()]+'</div></div><div class="rb-best"><div class="k">BEST</div><div class="v">'+(best?best.acc+'%':DASH)+'</div></div>';el.onclick=function(){openDetail(s,idx);};}
     function topRank(){var order=['SS','S','A','B','C','D'],bi=99,cnt=0;for(var i=0;i<SONGS.length;i++)for(var lv=1;lv<=10;lv++){var b=getBest(SONGS[i].id,lv);if(b){cnt++;var ix=order.indexOf(b.rank);if(ix>=0&&ix<bi)bi=ix;}}return {rank:bi<99?order[bi]:DASH,count:cnt};}
     function fillHomeStats(){var t=topRank();var el=menu.querySelector('#rbBestRank');if(el)el.textContent=t.rank;var rows=allBests();var rc=menu.querySelector('#rbHomeRecs');if(rc)rc.textContent=rows.length;var av=menu.querySelector('#rbHomeAvg');if(av)av.textContent='평균 정확도 '+(rows.length?Math.round(rows.reduce(function(a,r){return a+r.b.acc;},0)/rows.length)+'%':'—');}
@@ -2475,17 +2495,19 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     }
     window.refreshRecords=refreshRecords;
     var tabbar=document.createElement('nav');tabbar.id='tabbar';
-    var TABS=[['home','홈',I.home],['song','곡 선택',I.music],['rec','기록',I.chart],['ach','업적',I.trophy],['set','설정',I.gear]];
+    var TABS=[['home','홈',I.home],['song','곡 선택',I.music],['rec','기록',I.chart],['set','설정',I.gear]];
     tabbar.innerHTML=TABS.map(function(t){return '<button class="tabbtn" data-k="'+t[0]+'">'+t[2]+'<span>'+t[1]+'</span></button>';}).join('');
     stage.appendChild(tabbar);
     var SBI='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h2v3H2zM6 14h2v6H6zM10 11h2v9h-2zM14 8h2v12h-2zM18 5h2v15h-2z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8.5C5 6 8.4 4.7 12 4.7S19 6 22 8.5"/><path d="M5 12c2-1.7 4.4-2.6 7-2.6s5 .9 7 2.6"/><path d="M8.5 15.5c1-.8 2.2-1.3 3.5-1.3s2.5.5 3.5 1.3"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 26 14"><rect x="1" y="1" width="20" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".5"/><rect x="3" y="3" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor"/></svg>';
     var statusEl=document.createElement('div');statusEl.id='rbStatus';statusEl.innerHTML='<span>9:41</span><span class="r">'+SBI+'</span>';stage.appendChild(statusEl);
     var LIGHT={menuScreen:1,songScreen:1,settingsScreen:1,recordsScreen:1,detailScreen:1,calibScreen:1};
     var sb=document.createElement('aside');sb.id='rbSidebar';
-    var SNAV=[['home','홈',I.home],['song','곡 선택',I.music],['rec','기록',I.chart],['ach','업적',I.trophy],['set','설정',I.gear],['tut','튜토리얼',I.head]];
+    var SNAV=[['home','홈',I.home],['song','곡 선택',I.music],['rec','기록',I.chart],['set','설정',I.gear],['tut','튜토리얼',I.head]];
     sb.innerHTML='<div class="rb-sbrand"><div class="lg">'+I.music+'</div><div><h3>리듬베르</h3><p>Rhythm Camembert</p></div></div>'+SNAV.map(function(t){return '<button class="rb-nav" data-k="'+t[0]+'">'+t[2]+'<span>'+t[1]+'</span></button>';}).join('')+'<div class="rb-sprofile"><div class="av">'+CAT+'</div><div style="flex:1"><div style="font-weight:800;font-size:13.5px">리듬베르 <span id="rbSideLv" style="color:#8B5CF6;font-size:11.5px">Lv.1</span></div><div class="lvbar"><i id="rbSideXp"></i></div></div></div>';
     document.body.appendChild(sb);
-    sb.addEventListener('click',function(e){var b=e.target.closest('.rb-nav');if(!b)return;var k=b.dataset.k;
+    sb.addEventListener('click',function(e){
+      if(e.target.closest('.rb-sprofile')){if(window.refreshMy)window.refreshMy();showScreen('myScreen');return;}
+      var b=e.target.closest('.rb-nav');if(!b)return;var k=b.dataset.k;
       if(k==='home')showScreen('menuScreen');
       else if(k==='song'){try{initAudio();}catch(x){}refreshSongList();showScreen('songScreen');}
       else if(k==='rec'){refreshRecords();showScreen('recordsScreen');}
@@ -2494,7 +2516,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
       else if(k==='tut')startTutorial(true);});
     var TABMAP={menuScreen:'home',songScreen:'song',recordsScreen:'rec',settingsScreen:'set',achScreen:'ach'};
     tabbar.addEventListener('click',function(e){var b=e.target.closest('.tabbtn');if(!b)return;var k=b.dataset.k;if(k==='home')showScreen('menuScreen');else if(k==='song'){try{initAudio();}catch(x){}refreshSongList();showScreen('songScreen');}else if(k==='rec'){refreshRecords();showScreen('recordsScreen');}else if(k==='ach'){if(window.refreshAch)window.refreshAch();showScreen('achScreen');}else if(k==='set')showScreen('settingsScreen');});
-    function updateTab(id){var k=TABMAP[id];tabbar.classList.toggle('hidden',!k);tabbar.querySelectorAll('.tabbtn').forEach(function(b){b.classList.toggle('on',b.dataset.k===k);});sb.querySelectorAll('.rb-nav').forEach(function(b){b.classList.toggle('on',b.dataset.k===k);});}
+    function updateTab(id){var k=TABMAP[id];tabbar.classList.toggle('hidden',!k && id!=='myScreen');tabbar.querySelectorAll('.tabbtn').forEach(function(b){b.classList.toggle('on',b.dataset.k===k);});sb.querySelectorAll('.rb-nav').forEach(function(b){b.classList.toggle('on',b.dataset.k===k);});}
     hideAllOverlays=function(){stage.querySelectorAll('.overlay').forEach(function(o){o.classList.add('hidden');});};
     function rbGetXp(){try{return parseInt(localStorage.getItem('rc_xp')||'0',10)||0;}catch(e){return 0;}}
     function rbSetXp(v){try{localStorage.setItem('rc_xp',String(v));}catch(e){}}
@@ -2529,13 +2551,16 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     var _tut=startTutorial;
     startTutorial=function(){tabbar.classList.add('hidden');statusEl.classList.remove('on');document.body.classList.add('rb-playing');return _tut.apply(this,arguments);};
     fillRecent();fillHomeStats();rbRenderLevel();updateTab('menuScreen');statusEl.classList.add('on');var _pm=document.getElementById('playMascot');if(_pm)_pm.innerHTML=CAT;
-    var orient=(function(){try{var v=localStorage.getItem('rc_orient');if(v)return v;return (window.innerWidth>=1024?'landscape':'portrait');}catch(e){return 'portrait';}})();
+    var orient=(function(){try{var v=localStorage.getItem('rc_orient');if(v)return v;return (!isMobile&&window.innerWidth>=1024)?'landscape':'portrait';}catch(e){return 'portrait';}})();
+    // 기기를 물리적으로 돌려도 자동 회전하지 않도록, 저장된 선택(기본 세로)으로 화면 방향을 잠근다.
+    function lockOrient(o){try{if(window.screen&&screen.orientation&&screen.orientation.lock){var p=screen.orientation.lock(o==='landscape'?'landscape':'portrait');if(p&&p.catch)p.catch(function(){});}}catch(e){}}
     if(orient==='landscape')document.body.classList.add('rb-land');
+    lockOrient(orient);
     var sr=document.querySelector('#settingsScreen .setrows');
     if(sr){var orow=document.createElement('div');orow.className='setrow';
       orow.innerHTML='<div class="top"><span>플레이 화면</span></div><div class="seg" id="rbOrient"><div class="lay'+(orient==='portrait'?' sel':'')+'" data-o="portrait">세로</div><div class="lay'+(orient==='landscape'?' sel':'')+'" data-o="landscape">가로</div></div><div class="legend">게임 플레이를 세로 또는 가로 화면으로 즐겨보세요.</div>';
       sr.appendChild(orow);
-      orow.querySelector('#rbOrient').addEventListener('click',function(ev){var l=ev.target.closest('[data-o]');if(!l)return;orient=l.dataset.o;try{localStorage.setItem('rc_orient',orient);}catch(e){}orow.querySelectorAll('.lay').forEach(function(x){x.classList.toggle('sel',x===l);});document.body.classList.toggle('rb-land',orient==='landscape');});
+      orow.querySelector('#rbOrient').addEventListener('click',function(ev){var l=ev.target.closest('[data-o]');if(!l)return;orient=l.dataset.o;try{localStorage.setItem('rc_orient',orient);}catch(e){}orow.querySelectorAll('.lay').forEach(function(x){x.classList.toggle('sel',x===l);});document.body.classList.toggle('rb-land',orient==='landscape');lockOrient(orient);});
       var laneStyle=(function(){try{return localStorage.getItem('rc_lane')||'3d';}catch(e){return '3d';}})();
       if(laneStyle==='flat')document.body.classList.add('rb-flat');
       var lrow=document.createElement('div');lrow.className='setrow';
@@ -2581,8 +2606,22 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
       function checkAch(){var a=achStats();var got=achGot();var newly=[];ACHS.forEach(function(x){if(!got.has(x.id)&&x.chk(a)){got.add(x.id);newly.push(x);}});if(newly.length)achSaveSet(got);return newly;}
       window.rbCheckAch=checkAch;
       var achScr=document.createElement('div');achScr.className='overlay hidden';achScr.id='achScreen';stage.appendChild(achScr);
-      function refreshAch(){var a=achStats();var got=achGot();var done=ACHS.filter(function(x){return got.has(x.id);}).length;achScr.innerHTML='<div class="rb-sshead" style="margin-bottom:4px"><h2>업적</h2></div><div class="rb-achhead">'+done+' / '+ACHS.length+' 달성</div><div class="rb-achgrid">'+ACHS.map(function(x){var u=got.has(x.id);return '<div class="rb-ach'+(u?' on':'')+'"><div class="ic">'+(u?x.ic:'🔒')+'</div><div class="tx"><div class="t">'+x.t+'</div><div class="d">'+x.d+'</div></div></div>';}).join('')+'</div>';}
+      function closeAch(){achScr.classList.add('hidden');try{if(tabbar)tabbar.classList.remove('hidden');}catch(e){}}
+      function refreshAch(){var a=achStats();var got=achGot();var done=ACHS.filter(function(x){return got.has(x.id);}).length;achScr.innerHTML='<div class="rb-sshead" style="margin-bottom:4px"><h2>업적</h2><button class="rb-iconbtn" id="rbAchClose" title="닫기">✕</button></div><div class="rb-achhead">'+done+' / '+ACHS.length+' 달성</div><div class="rb-achgrid">'+ACHS.map(function(x){var u=got.has(x.id);return '<div class="rb-ach'+(u?' on':'')+'"><div class="ic">'+(u?x.ic:'🔒')+'</div><div class="tx"><div class="t">'+x.t+'</div><div class="d">'+x.d+'</div></div></div>';}).join('')+'</div>';var cb=achScr.querySelector('#rbAchClose');if(cb)cb.onclick=closeAch;}
       window.refreshAch=refreshAch;
+      // ── 마이페이지 ──
+      var myScr=document.createElement('div');myScr.className='overlay hidden';myScr.id='myScreen';stage.appendChild(myScr);
+      function refreshMy(){
+        var li=rbLevelInfo();var pct=Math.max(0,Math.min(100,Math.round(li.cur/li.need*100)));
+        var tr=topRank();var rows=allBests();var avg=rows.length?Math.round(rows.reduce(function(a,r){return a+r.b.acc;},0)/rows.length)+'%':DASH;
+        var got=achGot();var done=ACHS.filter(function(x){return got.has(x.id);}).length;
+        myScr.innerHTML='<div class="rb-sshead" style="margin-bottom:14px"><h2>마이페이지</h2></div>'
+          +'<div class="rb-mycard"><div class="rb-myav">'+CAT+'</div><div class="rb-myinfo"><div class="nm">리듬베르</div><div class="lv">Lv.'+li.level+' · '+pct+'%</div><div class="rb-mylvbar"><i style="width:'+pct+'%"></i></div></div></div>'
+          +'<div class="rb-mystats"><div class="rb-card"><div class="k">BEST RANK</div><div class="v rank">'+tr.rank+'</div></div><div class="rb-card"><div class="k">기록</div><div class="v">'+rows.length+'</div></div><div class="rb-card"><div class="k">평균 정확도</div><div class="v">'+avg+'</div></div></div>'
+          +'<button class="rb-myach" id="rbMyAch"><span class="l">🏆 업적</span><span class="r">'+done+' / '+ACHS.length+' ›</span></button>';
+        var b=myScr.querySelector('#rbMyAch');if(b)b.onclick=function(){refreshAch();achScr.classList.remove('hidden');try{if(tabbar)tabbar.classList.add('hidden');}catch(e){}};
+      }
+      window.refreshMy=refreshMy;
       var achToast=document.createElement('div');achToast.id='rbAchToast';document.body.appendChild(achToast);var rbl=document.createElement('div');rbl.id='rbLoad';rbl.innerHTML='<div class="rbl-box"><div class="spin"></div><div>불러오는 중…</div></div>';document.body.appendChild(rbl);
       function achToastShow(list){if(!list||!list.length)return;achToast.innerHTML=list.map(function(x){return '<div class="rb-achtoast"><div class="ic">'+x.ic+'</div><div><div class="t">업적 달성!</div><div class="d">'+x.t+' — '+x.d+'</div></div></div>';}).join('');achToast.classList.add('on');setTimeout(function(){achToast.classList.remove('on');},4200);}
       window.rbAchToast=achToastShow;
@@ -2621,15 +2660,16 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
       var INFO={
         howto:{t:'이용 방법',h:'<h3>기본</h3><p>4개 레인으로 노트가 판정선까지 내려옵니다. 노트가 <b>선에 닿는 순간</b> 그 레인을 터치하세요. 아래 패드뿐 아니라 레인 어디를 눌러도 됩니다.</p><h3>판정</h3><p><b>PERFECT · GREAT · GOOD</b> 순으로 정확할수록 점수가 높고, 놓치면 <b>MISS</b>예요. 정확도에 따라 최종 등급 <b>SS·S·A·B·C·D</b>가 매겨집니다.</p><h3>롱노트</h3><p>긴 노트는 선에 닿는 순간부터 <b>끝까지 누르고</b> 있어야 합니다. 흐르는 줄무늬가 있는 노트예요.</p><h3>콤보 · 피버</h3><p>콤보가 이어질수록 화면이 점점 뜨거워지고(12·30·60·100), FEVER 게이지가 차면 잠시 점수가 배로 들어옵니다.</p><h3>조작</h3><ul><li>모바일: 화면 터치(멀티터치 지원)</li><li>PC: 기본 <b>D · F · J · K</b> (설정에서 변경)</li><li>일시정지: 상단 버튼 또는 Esc</li></ul>'},
         notice:{t:'공지사항',h:'<h3>v1.0 · 오픈 베타</h3><p>리듬베르는 현재 <b>오픈 베타(얼리 액세스)</b> 단계예요. 기능이 계속 추가·개선되며 밸런스나 UI가 바뀔 수 있습니다.</p><h3>최근 업데이트</h3><ul><li>레인 전체 터치 입력 · 멀티터치</li><li>판정 창 표준화(기본 난이도 NORMAL)</li><li>롱노트 가시성 개선</li><li>지그재그 · 계단 패턴 추가</li><li>콤보 고조 연출 + 가속 효과음</li><li>곡 카드 등급 메달(SS~D)</li></ul><p class="muted">기록은 기기에 저장돼요. 설정 &gt; 기록 백업으로 안전하게 보관하세요.</p>'},
-        terms:{t:'이용약관',h:'<p>본 약관은 개인이 취미로 제작한 무료 리듬 게임 <b>리듬베르</b>의 이용에 적용됩니다.</p><h3>1. 서비스</h3><p>별도의 회원가입 없이 누구나 무료로 이용할 수 있습니다. 서비스 내용은 사전 고지 없이 변경·중단될 수 있습니다.</p><h3>2. 이용자 콘텐츠</h3><p>이용자가 추가한 음악 파일은 <b>이용자 본인의 브라우저에서만</b> 처리되며 서버로 전송되지 않습니다. 해당 파일의 저작권 준수 책임은 이용자에게 있습니다.</p><h3>3. 책임의 한계</h3><p>본 게임은 “있는 그대로” 제공됩니다. 제작자는 오류·중단·데이터 손실 등에 대해 관련 법이 허용하는 범위에서 책임을 지지 않습니다.</p><h3>4. 문의</h3><p>GitHub 저장소를 통해 의견을 남겨주세요.</p><p class="muted">본 약관은 예시 문구입니다. 실제 배포 조건에 맞게 제작자가 수정할 수 있습니다.</p>'},
+        terms:{t:'이용약관',h:'<p>본 약관은 개인이 취미로 만든 무료 리듬 게임 <b>리듬베르</b>(오픈 베타)의 이용에 적용됩니다.</p><h3>1. 서비스</h3><p>회원가입 없이 누구나 무료로 이용할 수 있어요. 오픈 베타 단계라 기능·수록곡·밸런스가 사전 고지 없이 변경·중단될 수 있습니다.</p><h3>2. 이용자 콘텐츠</h3><p>이용자가 추가한 음악 파일은 <b>이용자 본인의 브라우저에서만</b> 처리되며 서버로 전송되지 않습니다. 해당 파일의 저작권 준수 책임은 이용자에게 있어요.</p><h3>3. 수록곡 · 저작물</h3><p>게임 기본 수록곡은 제작자가 직접 생성한 곡입니다. 게임 내 감상 목적 외 무단 복제·재배포를 금합니다. (자세한 내용은 “노래 저작권” 참고)</p><h3>4. 책임의 한계</h3><p>본 게임은 “있는 그대로” 제공됩니다. 제작자는 오류·중단·데이터 손실 등에 대해 관련 법이 허용하는 범위에서 책임을 지지 않습니다.</p><h3>5. 문의</h3><p>설정의 건의함 또는 GitHub 저장소로 의견을 남겨주세요.</p><p class="muted">본 약관은 예시 문구를 바탕으로 작성되었습니다.</p>'},
         privacy:{t:'개인정보처리방침',h:'<p><b>리듬베르는 어떤 개인정보도 서버로 수집·전송하지 않습니다.</b></p><h3>저장되는 정보</h3><ul><li>게임 기록·설정·즐겨찾기 → 이용자 기기의 브라우저 저장소(localStorage)에만 저장</li><li>추가한 음악 파일 → 업로드 없이 브라우저 안에서만 재생</li></ul><h3>사용하지 않는 것</h3><p>쿠키 기반 추적, 광고, 분석 도구를 사용하지 않습니다.</p><h3>데이터 관리</h3><p>브라우저 데이터를 삭제하면 저장된 기록도 함께 사라집니다. 설정 &gt; 기록 백업에서 파일로 내보내거나 복원할 수 있어요.</p><h3>호스팅</h3><p>본 게임은 GitHub Pages로 제공되며, 접속 시 표준 서버 접속 로그(예: IP 주소)가 GitHub 측에 남을 수 있습니다.</p>'},
-        font:{t:'폰트 저작권',h:'<p>리듬베르에 사용된 글꼴과 라이선스입니다.</p><h3>Paperlogy (페이퍼로지)</h3><p>본문·UI 기본 글꼴. <b>SIL 오픈 폰트 라이선스(OFL)</b> — 개인·상업용 무료. 제작: 핏쿤 이주임 · 페이퍼로지 김도균.</p><h3>Pretendard</h3><p>보조 글꼴. <b>SIL Open Font License 1.1</b> — 길형진(orioncactus).</p><h3>구름소파 남김체 (로고)</h3><p>“리듬베르” 로고에 쓰인 손글씨 글꼴. Calligraphr로 제작·임베드했습니다.</p><p class="muted">각 글꼴은 해당 라이선스에 따라 사용되었습니다. 로고 글꼴의 원출처·라이선스는 배포 전 한 번 더 확인하는 것을 권장해요.</p>'}
+        music:{t:'노래 저작권',h:'<p>게임에 기본 수록된 곡은 제작자가 <b>Suno Pro</b>로 직접 생성한 음악입니다.</p><h3>권리 · 이용</h3><p>Suno의 Pro 플랜 정책상, 구독 상태에서 만든 곡의 <b>상업적 이용 권리는 제작자에게</b> 있습니다. 게임 내 감상 목적 외 <b>무단 복제·재배포·재업로드</b>는 삼가 주세요.</p><h3>오픈 베타 안내</h3><p>현재 <b>오픈 베타</b> 단계라 수록곡은 <b>추가·교체·삭제 등 변동될 수 있어요.</b> 이 과정에서 특정 곡의 기록이 사라질 수 있는 점 양해 부탁드립니다.</p><h3>참고</h3><p class="muted">AI로 생성된 음원은 국가·상황에 따라 저작권 보호 범위가 다를 수 있습니다.</p>'},
+        font:{t:'폰트 저작권',h:'<p>리듬베르에 사용된 글꼴과 라이선스입니다.</p><h3>Paperlogy (페이퍼로지)</h3><p>본문·UI 기본 글꼴. <b>SIL 오픈 폰트 라이선스(OFL)</b> — 개인·상업용 모두 무료이며, 글꼴 파일 자체의 판매만 금지됩니다. 제작: 핏쿤(이주임) · 페이퍼로지(김도균).</p><h3>Pretendard (프리텐다드)</h3><p>보조 글꼴. <b>SIL Open Font License 1.1</b> — 개인·상업용 무료(글꼴 자체 판매만 금지). 저작권: 길형진(orioncactus).</p><h3>CLOUD SOFA (구름소파 · 로고)</h3><p>“리듬베르” 로고에 쓰인 손글씨 글꼴. 제작: <b>남김</b>. 개인·상업용 무료이며 <b>웹 임베딩·로고(BI/CI) 사용이 허용</b>됩니다. 폰트 파일의 무단 재배포는 금지돼요. (출처: 눈누)</p><p class="muted">모든 글꼴은 각 라이선스 허용 범위 안에서 사용되었습니다.</p>'}
       };
       var infoModal=document.getElementById('rbInfoModal');
       if(!infoModal){infoModal=document.createElement('div');infoModal.id='rbInfoModal';infoModal.className='overlay hidden';stage.appendChild(infoModal);}
       function rbOpenInfo(key){var d=INFO[key];if(!d)return;infoModal.innerHTML='<div class="rb-sshead" style="margin-bottom:6px"><button class="rb-iconbtn" id="rbInfoBack">'+I.back+'</button><h2 style="margin-left:8px">'+d.t+'</h2></div><div class="rb-infobody">'+d.h+'</div>';infoModal.classList.remove('hidden');var bk=infoModal.querySelector('#rbInfoBack');if(bk)bk.onclick=function(){infoModal.classList.add('hidden');};}
       var irow=document.createElement('div');irow.className='setrow';
-      irow.innerHTML='<div class="top"><span>앱 정보 · 약관</span></div><div class="rb-infolist">'+[['howto','이용 방법'],['notice','공지사항'],['terms','이용약관'],['privacy','개인정보처리방침'],['font','폰트 저작권']].map(function(o){return '<button class="rb-infoitem" data-i="'+o[0]+'">'+o[1]+'</button>';}).join('')+'</div><div class="rb-ver">리듬베르 <b>v1.0</b> · 오픈 베타</div>';
+      irow.innerHTML='<div class="top"><span>앱 정보 · 약관</span></div><div class="rb-infolist">'+[['howto','이용 방법'],['notice','공지사항'],['terms','이용약관'],['privacy','개인정보처리방침'],['music','노래 저작권'],['font','폰트 저작권']].map(function(o){return '<button class="rb-infoitem" data-i="'+o[0]+'">'+o[1]+'</button>';}).join('')+'</div><div class="rb-ver">리듬베르 <b>v1.0</b> · 오픈 베타</div>';
       sr.appendChild(irow);
       irow.querySelector('.rb-infolist').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(b)rbOpenInfo(b.dataset.i);});
       function rbState(){var el=krow.querySelector('#rbCustomState');if(el){el.textContent=useCustom?'사용 중':'미사용';}}
