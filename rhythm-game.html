@@ -149,13 +149,24 @@
   .lane[data-l="2"] .note{background:linear-gradient(135deg,#FBCFE8,#F472B6);box-shadow:0 0 18px rgba(244,114,182,.6), inset 0 1px 0 rgba(255,255,255,.5);}
   .lane[data-l="3"] .note{background:linear-gradient(135deg,#A7F3D0,#34D399);box-shadow:0 0 18px rgba(52,211,153,.55), inset 0 1px 0 rgba(255,255,255,.5);}
   .note.hold{
-    border-radius:10px;opacity:.95;
+    border-radius:12px;opacity:1;overflow:hidden;
+    border:2px solid rgba(255,255,255,.6);
+    box-shadow:0 0 22px rgba(167,139,250,.7), inset 0 0 14px rgba(255,255,255,.28);
   }
-  .lane[data-l="0"] .note.hold{background:linear-gradient(to top,#8B5CF6,rgba(196,181,253,.30));}
-  .lane[data-l="1"] .note.hold{background:linear-gradient(to top,#60A5FA,rgba(165,216,255,.30));}
-  .lane[data-l="2"] .note.hold{background:linear-gradient(to top,#F472B6,rgba(251,207,232,.30));}
-  .lane[data-l="3"] .note.hold{background:linear-gradient(to top,#34D399,rgba(167,243,208,.30));}
-  .note.holding{filter:brightness(1.25) saturate(1.2);box-shadow:0 0 26px rgba(167,139,250,.85);}
+  /* 길게 눌러야 함을 알려주는 흐르는 사선 줄무늬 */
+  .note.hold::before{content:"";position:absolute;inset:0;border-radius:10px;
+    background:repeating-linear-gradient(-45deg,rgba(255,255,255,.18) 0 9px,rgba(255,255,255,0) 9px 18px);
+    animation:holdFlow .55s linear infinite;}
+  /* 판정선에 닿는 밝은 머리 */
+  .note.hold::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22px;border-radius:11px;
+    background:linear-gradient(to top,rgba(255,255,255,.92),rgba(255,255,255,0));
+    box-shadow:0 0 16px rgba(255,255,255,.65);}
+  @keyframes holdFlow{from{background-position:0 0;}to{background-position:0 25.5px;}}
+  .lane[data-l="0"] .note.hold{background:linear-gradient(to top,#8B5CF6,rgba(168,140,250,.62));}
+  .lane[data-l="1"] .note.hold{background:linear-gradient(to top,#60A5FA,rgba(120,180,250,.62));}
+  .lane[data-l="2"] .note.hold{background:linear-gradient(to top,#F472B6,rgba(246,150,200,.62));}
+  .lane[data-l="3"] .note.hold{background:linear-gradient(to top,#34D399,rgba(90,220,170,.62));}
+  .note.holding{filter:brightness(1.3) saturate(1.25);box-shadow:0 0 30px rgba(167,139,250,.95), inset 0 0 16px rgba(255,255,255,.4);}
 
   /* judgment line */
   #hitline{
@@ -206,10 +217,13 @@
      ===================================================================== */
   .overlay{
     position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:14px;text-align:center;
+    align-items:center;justify-content:safe center;gap:14px;text-align:center;
     background:var(--panelb);backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
-    padding:30px 26px;overflow:auto;color:var(--ink);
+    padding:30px 26px;overflow-y:auto;overflow-x:hidden;color:var(--ink);
+    -webkit-overflow-scrolling:touch;
   }
+  /* 세로로 넘칠 때 위/아래가 잘리지 않도록: 내용이 화면보다 크면 위에서부터 스크롤 */
+  #resultScreen>*{flex-shrink:0;}
   .overlay::-webkit-scrollbar{width:0;}
   .overlay.hidden{display:none;}
   /* floating ambient blobs in light overlays */
@@ -376,6 +390,7 @@
 <body>
 <div id="splash"><div class="sp-aurora"><i></i><i></i><i></i><i></i></div><div class="sp-grid"></div><div class="sp-notes"><span style="left:16%;top:26%;animation-delay:-.5s">♪</span><span style="left:82%;top:22%;animation-delay:-1.6s">♫</span><span style="left:24%;top:70%;animation-delay:-2.4s">♬</span><span style="left:76%;top:66%;animation-delay:-3.2s">♩</span><span style="left:50%;top:13%;animation-delay:-1.1s">♪</span></div><div class="sp-core"><div class="sp-logo"><div class="sp-ring"></div><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spcb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b5080"/><stop offset="1" stop-color="#2a2340"/></linearGradient><linearGradient id="sphp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#67E8F9"/><stop offset="1" stop-color="#F472B6"/></linearGradient></defs><ellipse cx="100" cy="150" rx="47" ry="39" fill="url(#spcb)"/><path d="M65 70 L60 35 L93 60 Z" fill="url(#spcb)"/><path d="M135 70 L140 35 L107 60 Z" fill="url(#spcb)"/><circle cx="100" cy="99" r="44" fill="url(#spcb)"/><path d="M56 96 a44 42 0 0 1 88 0" stroke="url(#sphp)" stroke-width="9" stroke-linecap="round" fill="none"/><rect x="43" y="86" width="22" height="34" rx="11" fill="url(#sphp)"/><rect x="135" y="86" width="22" height="34" rx="11" fill="url(#sphp)"/><path d="M77 103 q9 -8 17 0" stroke="#EDE9FF" stroke-width="3.6" stroke-linecap="round" fill="none"/><path d="M106 103 q9 -8 17 0" stroke="#EDE9FF" stroke-width="3.6" stroke-linecap="round" fill="none"/><ellipse cx="74" cy="114" rx="6" ry="3.4" fill="#F472B6" opacity=".6"/><ellipse cx="126" cy="114" rx="6" ry="3.4" fill="#F472B6" opacity=".6"/><path d="M97 111 h6 l-3 4 z" fill="#C4B5FD"/></svg></div><h1 class="sp-title">리듬베르</h1><div class="sp-sub">RHYTHM · CAMEMBERT</div><div class="sp-bar"><i></i></div></div></div><script>(function(){var s=document.getElementById("splash");if(!s)return;function go(){s.classList.add("gone");setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);},800);}var t=setTimeout(go,2100);s.addEventListener("click",function(){clearTimeout(t);go();});})();</script>
 <div id="stage" class="playing">
+  <div id="heat"></div>
   <div id="progressWrap"><div id="progressBar"></div></div>
   <div id="hud">
     <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
@@ -558,7 +573,7 @@ const glowEl  = [0,1,2,3].map(i => lanesEl[i].querySelector('.glow'));
 const isMobile = window.matchMedia('(pointer:coarse)').matches || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
 /* ---------- timing windows (seconds) ---------- */
-const W_PERFECT = 0.062, W_GREAT = 0.125, W_GOOD = 0.185, W_MISS = 0.250;
+const W_PERFECT = 0.050, W_GREAT = 0.110, W_GOOD = 0.175, W_MISS = 0.215;
 const HOLD_RELEASE_GRACE = 0.14;     // 꼬리 직전 이만큼 일찍 떼도 성공
 const SCORE = {PERFECT:300, GREAT:200, GOOD:100};
 const ACCW  = {PERFECT:1, GREAT:0.8, GOOD:0.5, MISS:0};
@@ -577,7 +592,7 @@ const DIFFS = {
   4:{name:'EXPERT', dens:1.00, eighth:0.72, six:0.28, chord:0.16, hold:0.16, approach:1.18, gap:0.16},
   5:{name:'MASTER', dens:1.00, eighth:0.96, six:0.62, chord:0.24, hold:0.12, approach:1.00, gap:0.11},
 };
-let level = 2;
+let level = 3;   // 기본 NORMAL
 
 /* ---------- note frequencies ---------- */
 const HZ = {
@@ -797,9 +812,17 @@ function buildChartSynth(song, lv){
   songLen = TOTAL_BEATS*SPB;
   let lastLane=-1;
   const laneFreeAt=[0,0,0,0];   // beat until which lane is occupied by a hold
+  let runLeft=0, runDir=1;      // 계단/지그재그 스트림 상태
   const pick=()=>{
     let l=Math.floor(Math.random()*4), tries=0;
     while((l===lastLane || laneFreeAt[l]>0) && tries<8){ l=(l+1)%4; tries++; }
+    lastLane=l; return l;
+  };
+  const pickStep=()=>{           // 이전 레인에서 한 칸씩 이동(양끝에서 튕겨 지그재그)
+    if(lastLane<0) return pick();
+    let l=lastLane+runDir;
+    if(l>3){ l=2; runDir=-1; } else if(l<0){ l=1; runDir=1; }
+    if(laneFreeAt[l]>0) return pick();
     lastLane=l; return l;
   };
   const add=(beat,lane,holdBeats)=>{
@@ -816,17 +839,28 @@ function buildChartSynth(song, lv){
     let p;
     if(s%4===0) p=cfg.dens; else if(s%2===0) p=cfg.eighth; else p=cfg.six;
     if(Math.random()<p){
-      const lane=pick();
-      // hold note on strong beats (Hard+)
+      const stream = (s%4!==0);          // 정박이 아닌 잔음 = 스트림 후보
+      let lane, inRun=false;
+      if(runLeft>0){ lane=pickStep(); runLeft--; inRun=true; }
+      else if(stream && cfg.eighth>0.35 && Math.random()<0.30){
+        runDir = Math.random()<0.5?1:-1;
+        runLeft = 3+Math.floor(Math.random()*3);   // 3~5연속 계단/지그재그
+        lane=pickStep(); runLeft--; inRun=true;
+      } else {
+        lane=pick();
+      }
+      // 홀드·코드는 스트림 중엔 넣지 않아 깔끔한 계단이 유지됨
       let holdBeats=0;
-      if(s%4===0 && Math.random()<cfg.hold && beat<TOTAL_BEATS-2){
+      if(!inRun && s%4===0 && Math.random()<cfg.hold && beat<TOTAL_BEATS-2){
         holdBeats = Math.random()<0.5?1:2;
       }
       add(beat, lane, holdBeats);
-      if(holdBeats===0 && Math.random()<cfg.chord){
+      if(!inRun && holdBeats===0 && Math.random()<cfg.chord){
         let l2=(lane+1+Math.floor(Math.random()*3))%4;
         if(laneFreeAt[l2]===0) add(beat, l2, 0);
       }
+    } else {
+      runLeft=0;   // 노트가 비면 스트림 끊기
     }
   }
   chart.sort((a,b)=>a.t-b.t);
@@ -1040,6 +1074,7 @@ function startGame(){
   }
   // reset
   score=0;combo=0;maxCombo=0;life=LIFE_MAX;failed=false;
+  comboTier=-1; updateComboHeat();
   counts={PERFECT:0,GREAT:0,GOOD:0,MISS:0}; hitErrors=[];
   particles.length=0; lastBeatPulse=-1; fever=0; feverActive=false; feverEndAt=0; document.body.classList.remove('fever-on'); updateFever();
   lanesEl.forEach(l=>l.querySelectorAll('.note').forEach(n=>n.remove()));
@@ -1189,7 +1224,7 @@ function releaseLane(lane){
       else { // released too early
         n.holding=false; n.broken=true; n.tailDone=true;
         combo=0; counts.MISS++; life=Math.max(0,life-LIFE_BREAK);
-        $('#combo').style.opacity=0; updateLife(); loseFever();
+        $('#combo').style.opacity=0; updateComboHeat(); updateLife(); loseFever();
         showJudge('MISS',null); missSound(); removeEl(n);
         if(MODS.sudden){ fail(); return; }
         if(life<=0 && !settings.nofail) fail();
@@ -1225,7 +1260,7 @@ function registerMiss(lane){
   counts.MISS++; combo=0;
   life=Math.max(0,life-LIFE_MISS);
   showJudge('MISS',null); missSound();
-  $('#combo').style.opacity=0;
+  $('#combo').style.opacity=0; updateComboHeat();
   updateLife(); loseFever();
   if(MODS.sudden){ fail(); return; }
   if(life<=0 && !settings.nofail) fail();
@@ -1255,7 +1290,38 @@ function showJudge(text,early){
     requestAnimationFrame(()=>{ js.style.transition='opacity .45s'; js.style.opacity=0; });
   }
 }
+let comboTier=-1;
+function whooshSound(tier){
+  // 콤보 단계가 오를 때의 "슝~" — 상승하는 필터드 노이즈 + 피치 스윕
+  if(!ac || settings.sfx<=0) return;
+  const t=ac.currentTime, dur=0.42;
+  const base=260+tier*70;
+  const o=ac.createOscillator(), g=ac.createGain(), lp=ac.createBiquadFilter();
+  o.type='sawtooth'; o.frequency.setValueAtTime(base,t); o.frequency.exponentialRampToValueAtTime(base*3.4,t+dur*0.8);
+  lp.type='lowpass'; lp.frequency.setValueAtTime(650,t); lp.frequency.exponentialRampToValueAtTime(5000,t+dur*0.75);
+  o.connect(lp); lp.connect(g); g.connect(sfxGain);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.15,t+0.07); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.start(t); o.stop(t+dur+0.02);
+  if(noiseBuf){   // 바람 소리 텍스처
+    const sn=ac.createBufferSource(); sn.buffer=noiseBuf;
+    const bp=ac.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=0.7;
+    bp.frequency.setValueAtTime(500,t); bp.frequency.exponentialRampToValueAtTime(4200,t+dur*0.78);
+    const ng=ac.createGain(); ng.gain.setValueAtTime(0.0001,t); ng.gain.exponentialRampToValueAtTime(0.11,t+0.09); ng.gain.exponentialRampToValueAtTime(0.0001,t+dur*0.95);
+    sn.connect(bp); bp.connect(ng); ng.connect(sfxGain); sn.start(t); sn.stop(t+dur);
+  }
+}
+function updateComboHeat(){
+  // 콤보 단계: 12/30/60/100 에서 고조 연출이 한 단계씩 세지고 빨라짐
+  const t = combo>=100?4 : combo>=60?3 : combo>=30?2 : combo>=12?1 : 0;
+  if(t===comboTier) return;
+  const prev=comboTier; comboTier=t;
+  const b=document.body;
+  b.classList.remove('cx1','cx2','cx3','cx4');
+  if(t>0) b.classList.add('cx'+t);
+  if(t>prev && t>0 && prev>=0) whooshSound(t);   // 단계가 올라갈 때만 슝~
+}
 function showCombo(){
+  updateComboHeat();
   if(combo<2) return;
   const c=$('#combo'); $('#comboNum').textContent=combo;
   c.style.transition='none'; c.style.opacity=1; c.style.transform='scale(1.12)';
@@ -1404,6 +1470,7 @@ function quitToSongs(){
   running=false; paused=false; cancelAnimationFrame(raf);
   stopMusic(); if(ac) ac.resume();
   lanesEl.forEach(l=>l.querySelectorAll('.note').forEach(n=>n.remove()));
+  combo=0; comboTier=-1; updateComboHeat();
   $('#pauseBtn').classList.remove('show'); $('#tapMuteBtn').classList.remove('show');
   $('#countdown').classList.remove('show');
   refreshSongList();
@@ -1416,6 +1483,7 @@ function finish(isFail){
   if(!running) return;
   running=false; paused=false; cancelAnimationFrame(raf);
   stopMusic(); if(ac) ac.resume();
+  combo=0; comboTier=-1; updateComboHeat();
   $('#pauseBtn').classList.remove('show'); $('#tapMuteBtn').classList.remove('show');
   $('#countdown').classList.remove('show');
   lanesEl.forEach(l=>l.querySelectorAll('.note').forEach(n=>n.remove()));
@@ -2045,7 +2113,7 @@ body{background:radial-gradient(112% 74% at 6% -6%,#E9D9FF 0%,transparent 47%),r
 .rb-rcols{width:100%;} #recordsScreen .rb-rsec{break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 16px;} #recordsScreen .rb-rsec .rb-rsum,#recordsScreen .rb-rsec .rb-lvcard{margin:0!important;}
 @media(min-width:1024px){#recordsScreen .rb-rcols{column-count:2;column-gap:18px;max-width:760px!important;} #recordsScreen .rb-rcols #rbRecList{display:flex!important;flex-direction:column!important;gap:8px!important;}}
 @media(min-width:768px) and (max-width:1023px){#settingsScreen .setrows{display:block!important;column-count:2;column-gap:16px;max-width:680px!important;margin-left:auto!important;margin-right:auto!important;}#settingsScreen .setrow{display:flex!important;flex-direction:column;break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 16px!important;align-self:auto!important;width:auto!important;}#settingsScreen{padding-top:48px!important;padding-bottom:108px!important;} #recordsScreen,#statsScreen{padding-bottom:110px!important;}}
-@media(min-width:1024px){#settingsScreen{padding:48px 46px 56px!important;align-items:flex-start!important;} #settingsScreen>*{margin-left:0!important;margin-right:auto!important;} #settingsScreen .setrows{display:block!important;column-count:2;column-gap:18px;max-width:920px!important;margin-left:0!important;margin-right:0!important;}#settingsScreen .setrow{display:flex!important;flex-direction:column;break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 16px!important;align-self:auto!important;width:auto!important;}}
+@media(min-width:1024px){#settingsScreen{padding:48px 46px 56px!important;align-items:flex-start!important;} #settingsScreen>*{margin-left:0!important;margin-right:auto!important;} #settingsScreen .setrows{display:block!important;column-count:2;column-gap:16px;max-width:920px!important;margin-left:0!important;margin-right:0!important;}#settingsScreen .setrow{display:flex!important;flex-direction:column;break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 16px!important;align-self:auto!important;width:auto!important;}}
 @media(max-width:767px){#settingsScreen,#recordsScreen,#statsScreen{align-items:stretch!important;} #settingsScreen .setrows{margin-left:0!important;margin-right:0!important;max-width:none!important;}}
 #recordsScreen>*,#statsScreen>*{width:100%;max-width:600px!important;margin-left:0!important;margin-right:auto!important;}
 body:not(.rb-playing) #lanes,body:not(.rb-playing) #pads,body:not(.rb-playing) #playMascot,body:not(.rb-playing) #hud,body:not(.rb-playing) #lifeWrap,body:not(.rb-playing) #progressWrap,body:not(.rb-playing) #combo,body:not(.rb-playing) #judge,body:not(.rb-playing) #judgeSub,body:not(.rb-playing) #countdown,body:not(.rb-playing) #pauseBtn,body:not(.rb-playing) #fx{display:none!important;}
@@ -2106,6 +2174,48 @@ button:focus-visible,.rb-nav:focus-visible,.tabbtn:focus-visible,.rb-chip:focus-
 /* ---- combo milestone ---- */
 #combo.milestone{animation:rbMile .45s ease;}
 @keyframes rbMile{0%{transform:scale(1)}35%{transform:scale(1.5)}100%{transform:scale(1)}}
+
+/* ---- 콤보 고조 연출 (슈퍼스타 스타일: 콤보가 오를수록 단계적으로 밝고 빠르게) ---- */
+#heat{position:absolute;left:0;right:0;bottom:0;height:52%;pointer-events:none;z-index:3;opacity:0;
+  transition:opacity .5s ease;
+  background:radial-gradient(115% 100% at 50% 100%, var(--heatCol,rgba(167,139,250,.55)) 0%, transparent 72%);}
+body.cx1 #heat{opacity:.30;--heatCol:rgba(167,139,250,.5);}
+body.cx2 #heat{opacity:.48;--heatCol:rgba(96,165,250,.6);animation:heatPulse 1s ease-in-out infinite;}
+body.cx3 #heat{opacity:.64;--heatCol:rgba(244,114,182,.66);animation:heatPulse .66s ease-in-out infinite;}
+body.cx4 #heat{opacity:.82;--heatCol:rgba(251,191,36,.72);animation:heatPulse .44s ease-in-out infinite;}
+@keyframes heatPulse{0%,100%{transform:scaleY(1);}50%{transform:scaleY(1.16);}}
+body.cx2 .note{filter:brightness(1.1);}
+body.cx3 .note{filter:brightness(1.18) saturate(1.15);}
+body.cx4 .note{filter:brightness(1.3) saturate(1.32);}
+body.cx2 #hitline{box-shadow:0 0 26px rgba(96,165,250,.85)!important;}
+body.cx3 #hitline{box-shadow:0 0 30px rgba(244,114,182,.9)!important;}
+body.cx4 #hitline{box-shadow:0 0 36px rgba(251,191,36,.95),0 0 70px rgba(251,191,36,.5)!important;}
+#combo.milestone{will-change:transform;}
+@media (prefers-reduced-motion: reduce){ #heat{animation:none!important;} }
+
+/* ---- 앱 정보 · 약관 ---- */
+.rb-infolist{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.rb-infoitem{text-align:left!important;background:rgba(139,92,246,.06)!important;border:1px solid rgba(139,92,246,.15)!important;color:var(--ink)!important;font-weight:700;font-size:13.5px;padding:11px 14px!important;border-radius:12px!important;cursor:pointer;box-shadow:none!important;height:auto!important;display:flex!important;justify-content:space-between;align-items:center;}
+.rb-infoitem::after{content:'›';color:#9A93AE;font-size:18px;font-weight:800;}
+.rb-infoitem:active{transform:scale(.98);}
+.rb-ver{margin-top:11px;text-align:center;font-size:12px;color:#9A93AE;font-weight:700;letter-spacing:.02em;}
+.rb-ver b{color:var(--accent1);}
+.rb-infobody{max-width:560px;margin:0 auto;text-align:left;line-height:1.85;font-size:13.7px;color:var(--ink);width:100%;padding-bottom:20px;}
+.rb-infobody h3{font-size:14.5px;font-weight:800;margin:17px 0 6px;color:var(--accent1);}
+.rb-infobody p{margin:0 0 9px;}
+.rb-infobody ul{margin:0 0 9px;padding-left:18px;}
+.rb-infobody li{margin:0 0 5px;}
+.rb-infobody b{font-weight:800;}
+.rb-infobody .muted{color:#9A93AE;font-size:12.5px;}
+.rb-fbbtn{margin-top:6px;height:48px;border-radius:14px;font-size:14px;font-weight:800;color:#fff!important;border:none;cursor:pointer;width:100%;background:linear-gradient(135deg,#A78BFA,#7C3AED)!important;box-shadow:0 8px 20px rgba(124,58,237,.32)!important;}
+.rb-fbbtn:active{transform:scale(.98);}
+/* ---- 설정 섹션 헤더 ---- */
+.setgroup{grid-column:1/-1;column-span:all;-webkit-column-span:all;break-after:avoid;break-inside:avoid;-webkit-column-break-inside:avoid;
+  font-size:12.5px;font-weight:800;letter-spacing:.06em;color:var(--accent1);
+  margin:18px 4px 9px;padding:0 2px;opacity:.92;text-align:left!important;width:100%;}
+.setgroup:first-child{margin-top:2px;}
+/* 설정 카드 내부 글씨 왼쪽 정렬 */
+#settingsScreen .setrow,#settingsScreen .setrow .legend,#settingsScreen .setrow .top{text-align:left!important;}
 body.rb-cb #judge{-webkit-text-stroke:1px rgba(0,0,0,.55);text-shadow:0 2px 7px rgba(0,0,0,.55);}
 body.rb-cb #judgeSub{font-weight:800;-webkit-text-stroke:.5px rgba(0,0,0,.4);}
 /* ---- result quick controls ---- */
@@ -2143,9 +2253,9 @@ body.fever-on #hitline{box-shadow:0 0 26px rgba(251,191,36,.95)!important;}
 .rb-unlock.sel{background:linear-gradient(135deg,#A78BFA,#7C3AED);color:#fff;border-color:rgba(255,255,255,.35);}
 .rb-unlock.lock{opacity:.5;cursor:not-allowed;font-size:11px;}
 /* ---- achievements ---- */
-.rb-achhead{font-size:13px;font-weight:800;color:var(--accent1);margin:0 0 12px;}
-.rb-achgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.rb-ach{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:rgba(255,255,255,.6);opacity:.55;filter:grayscale(.5);}
+.rb-achhead{font-size:13px;font-weight:800;color:var(--accent1);margin:0 0 16px;text-align:left;}
+.rb-achgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.rb-ach{display:flex;gap:13px;align-items:center;padding:17px 16px;border-radius:16px;background:rgba(255,255,255,.6);opacity:.55;filter:grayscale(.5);}
 .rb-ach.on{opacity:1;filter:none;box-shadow:0 6px 16px rgba(139,92,246,.14);}
 .rb-ach .ic{font-size:22px;flex:none;}
 .rb-ach .t{font-size:13px;font-weight:800;color:var(--ink);}
@@ -2163,8 +2273,17 @@ body.fever-on #hitline{box-shadow:0 0 26px rgba(251,191,36,.95)!important;}
 .rb-prevbtn svg{width:15px;height:15px;}
 .rb-prevbtn.on{background:linear-gradient(135deg,#A78BFA,#7C3AED);color:#fff;border-color:transparent;}
 .rb-scard .cv{position:relative;}
-.rb-clear{position:absolute;top:-5px;left:-5px;width:21px;height:21px;border-radius:50%;background:linear-gradient(135deg,#34D399,#10B981);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 7px rgba(16,185,129,.55);z-index:2;}
-.rb-scard.cleared{border-color:rgba(16,185,129,.4)!important;}
+/* 성적 메달 (슈퍼스타 스타일) — 커버 안쪽 모서리에, 등급별 색상 */
+.rb-grade{position:absolute;right:3px;bottom:3px;min-width:23px;height:23px;padding:0 4px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:900;color:#fff;line-height:1;letter-spacing:.01em;box-shadow:0 3px 8px rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.9);z-index:3;}
+.rb-grade.g-ss{background:linear-gradient(135deg,#FDE68A,#F59E0B);color:#5b3d00;}
+.rb-grade.g-s {background:linear-gradient(135deg,#C4B5FD,#8B5CF6);}
+.rb-grade.g-a {background:linear-gradient(135deg,#60A5FA,#3B82F6);}
+.rb-grade.g-b {background:linear-gradient(135deg,#34D399,#10B981);}
+.rb-grade.g-c {background:linear-gradient(135deg,#FBBF24,#F59E0B);}
+.rb-grade.g-d {background:linear-gradient(135deg,#B6BAC6,#8A90A0);}
+.rb-grade.fc {box-shadow:0 0 0 2px rgba(52,211,153,.55),0 3px 10px rgba(16,185,129,.45);}
+.rb-grade.ap {background:linear-gradient(135deg,#F9A8D4,#A78BFA 46%,#67E8F9);color:#fff;border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.55),0 3px 12px rgba(167,139,250,.65);}
+.rb-scard.cleared{border-color:rgba(139,92,246,.26)!important;}
 /* ---- themes ---- */
 body.theme-sunset{--accent1:#F97316;--accent2:#FB923C;--pink:#F43F5E;}
 body.theme-aqua{--accent1:#0EA5E9;--accent2:#38BDF8;--pink:#06B6D4;}
@@ -2279,7 +2398,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     function pushRecent(){try{if(typeof curSong==='undefined'||!curSong||!curSong.id)return;var r=recents().filter(function(x){return x!==curSong.id;});r.unshift(curSong.id);localStorage.setItem('rc_recent',JSON.stringify(r.slice(0,8)));}catch(e){}}
     function starN(bpm){return bpm<100?3:bpm<140?4:5;}
     function starHTML(n){var h='';for(var i=1;i<=5;i++)h+='<span'+(i<=n?'':' class="o"')+'>★</span>';return '<span class="rb-stars">'+h+'</span>';}
-    var DIFFNAMES={1:'EASY',2:'EASY',3:'NORMAL',4:'NORMAL',5:'HARD',6:'HARD',7:'EXPERT',8:'EXPERT',9:'MASTER',10:'MASTER'};
+    var DIFFNAMES={1:'EASY',2:'EASY+',3:'NORMAL',4:'NORMAL+',5:'HARD',6:'HARD+',7:'EXPERT',8:'EXPERT+',9:'MASTER',10:'MASTER+'};
     var DIFFCLS={1:'e',2:'e',3:'n',4:'n',5:'h',6:'h',7:'x',8:'x',9:'m',10:'m'};
     if(typeof DIFFS!=='undefined'){var DC=[[0.30,0,0,0,0,2.45,0.58],[0.42,0,0,0,0,2.15,0.50],[0.55,0.05,0,0,0.06,1.95,0.42],[0.68,0.15,0,0.02,0.10,1.75,0.35],[0.80,0.28,0.03,0.04,0.12,1.58,0.29],[0.90,0.42,0.08,0.07,0.15,1.45,0.24],[0.95,0.55,0.16,0.10,0.16,1.32,0.20],[0.98,0.70,0.30,0.14,0.16,1.20,0.17],[1.00,0.85,0.48,0.20,0.14,1.08,0.14],[1.00,0.98,0.66,0.26,0.12,0.98,0.11]];for(var di=0;di<10;di++){var d=DC[di];DIFFS[di+1]={name:DIFFNAMES[di+1],dens:d[0],eighth:d[1],six:d[2],chord:d[3],hold:d[4],approach:d[5],gap:d[6]};}} if(typeof SONGS!=="undefined"){SONGS.forEach(function(s){s.bars=Math.max(16,Math.round(s.bpm/4));});} if(typeof SONGS!=="undefined"&&RB_MYSONGS&&RB_MYSONGS.length){RB_MYSONGS.forEach(function(m){if(!SONGS.some(function(x){return x.id===m.id;}))SONGS.push({id:m.id,title:m.title,artist:m.artist,genre:m.genre||'',bpm:m.bpm||100,bars:16,embed:true,src:'music/'+encodeURIComponent(m.file||(m.title+'.mp3'))});});try{if(typeof fetch==="function"){var _pl=SONGS.filter(function(s){return s.embed;})[0];if(_pl){initAudio();fetch(_pl.src).then(function(r){return r.arrayBuffer();}).then(function(a){return ac.decodeAudioData(a);}).then(function(buf){_pl._buf=buf;_pl._onsets=detectOnsets(buf);}).catch(function(){});}}}catch(e){}}
     function curLevel(){return (typeof level!=='undefined')?level:2;}
@@ -2313,7 +2432,8 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     song.querySelector('#rbSearch').addEventListener('input',function(e){state.query=e.target.value.trim().toLowerCase();buildSongList();});
     song.querySelector('#rbChips').addEventListener('click',function(e){var c=e.target.closest('[data-f]');if(!c)return;state.filter=c.dataset.f;song.querySelectorAll('#rbChips .rb-chip').forEach(function(x){x.classList.toggle('on',x===c);});buildSongList();});
     function bestAny(id){var b=null;for(var lv=1;lv<=10;lv++){var r=getBest(id,lv);if(r&&(!b||r.score>b.score)){b=r;b._lv=lv;}}return b;}
-    function buildSongList(){var list=document.getElementById('songList');if(!list)return;var favs=favSet(),rec=recents();list.innerHTML='';var items=SONGS.map(function(s,i){return {s:s,i:i};});if(state.filter.indexOf('g:')===0){var _g=state.filter.slice(2);items=items.filter(function(o){return o.s.genre===_g;});}if(state.filter==='fav')items=items.filter(function(o){return favs.has(o.s.id);});if(state.filter==='recent')items=items.filter(function(o){return rec.indexOf(o.s.id)>=0;});if(state.query)items=items.filter(function(o){return (o.s.title+' '+o.s.artist).toLowerCase().indexOf(state.query)>=0;});if(!items.length)list.innerHTML='<div class="rb-empty">조건에 맞는 곡이 없어요.</div>';items.forEach(function(o){var s=o.s,i=o.i,best=bestAny(s.id),fav=favs.has(s.id);var card=document.createElement('div');card.className='rb-scard'+(best?' cleared':'');card.innerHTML='<div class="cv">'+cover(s.id)+(best?'<span class="rb-clear">✓</span>':'')+'</div><div class="mt"><div class="t">'+s.title+'</div><div class="d">'+s.artist+' · BPM '+s.bpm+'</div>'+starHTML(starN(s.bpm))+'</div><button class="rb-fav'+(fav?' on':'')+'" data-fav>'+I.heart+'</button><div class="rb-best"><div class="k">'+(best?'Lv.'+best._lv:'BEST')+'</div><div class="v">'+(best?best.rank+' · '+best.acc+'%':DASH)+'</div></div><button class="rb-pl">'+I.play+'</button>';card.querySelector('[data-fav]').onclick=function(ev){ev.stopPropagation();var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);buildSongList();};card.onclick=function(){openDetail(s,i);};list.appendChild(card);});if(state.filter==='all'){var up=document.createElement('div');up.className='rb-scard rb-up';up.textContent='＋ 내 음악 파일 추가 (mp3 등)';up.onclick=function(){fileInput.click();};list.appendChild(up);}}
+    function gradeMedal(b){if(!b)return '';var r=b.rank||'D';var tier=(r==='SS')?'ss':(r==='S')?'s':(r==='A')?'a':(r==='B')?'b':(r==='C')?'c':'d';var extra=b.ap?' ap':(b.fc?' fc':'');return '<span class="rb-grade g-'+tier+extra+'" title="최고 '+(b.ap?'ALL PERFECT ':(b.fc?'FULL COMBO ':''))+r+' · '+b.acc+'%">'+r+'</span>';}
+    function buildSongList(){var list=document.getElementById('songList');if(!list)return;var favs=favSet(),rec=recents();list.innerHTML='';var items=SONGS.map(function(s,i){return {s:s,i:i};});if(state.filter.indexOf('g:')===0){var _g=state.filter.slice(2);items=items.filter(function(o){return o.s.genre===_g;});}if(state.filter==='fav')items=items.filter(function(o){return favs.has(o.s.id);});if(state.filter==='recent')items=items.filter(function(o){return rec.indexOf(o.s.id)>=0;});if(state.query)items=items.filter(function(o){return (o.s.title+' '+o.s.artist).toLowerCase().indexOf(state.query)>=0;});if(!items.length)list.innerHTML='<div class="rb-empty">조건에 맞는 곡이 없어요.</div>';items.forEach(function(o){var s=o.s,i=o.i,best=bestAny(s.id),fav=favs.has(s.id);var card=document.createElement('div');card.className='rb-scard'+(best?' cleared':'');card.innerHTML='<div class="cv">'+cover(s.id)+gradeMedal(best)+'</div><div class="mt"><div class="t">'+s.title+'</div><div class="d">'+s.artist+' · BPM '+s.bpm+'</div>'+starHTML(starN(s.bpm))+'</div><button class="rb-fav'+(fav?' on':'')+'" data-fav>'+I.heart+'</button><div class="rb-best"><div class="k">'+(best?'Lv.'+best._lv:'BEST')+'</div><div class="v">'+(best?best.rank+' · '+best.acc+'%':DASH)+'</div></div><button class="rb-pl">'+I.play+'</button>';card.querySelector('[data-fav]').onclick=function(ev){ev.stopPropagation();var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);buildSongList();};card.onclick=function(){openDetail(s,i);};list.appendChild(card);});if(state.filter==='all'){var up=document.createElement('div');up.className='rb-scard rb-up';up.textContent='＋ 내 음악 파일 추가 (mp3 등)';up.onclick=function(){fileInput.click();};list.appendChild(up);}}
     var detail=document.createElement('div');detail.className='overlay hidden';detail.id='detailScreen';stage.appendChild(detail);
     var previewNode=null,previewTimer=null,previewSong=null;
     function stopPreview(){if(previewNode){try{previewNode.stop();}catch(e){}previewNode=null;}if(previewTimer){clearTimeout(previewTimer);previewTimer=null;}previewSong=null;var b=document.getElementById('dPreview');if(b){b.classList.remove('on');b.innerHTML=I.play+' 미리듣기';}}
@@ -2461,7 +2581,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
       function checkAch(){var a=achStats();var got=achGot();var newly=[];ACHS.forEach(function(x){if(!got.has(x.id)&&x.chk(a)){got.add(x.id);newly.push(x);}});if(newly.length)achSaveSet(got);return newly;}
       window.rbCheckAch=checkAch;
       var achScr=document.createElement('div');achScr.className='overlay hidden';achScr.id='achScreen';stage.appendChild(achScr);
-      function refreshAch(){var a=achStats();var got=achGot();var done=ACHS.filter(function(x){return got.has(x.id);}).length;achScr.innerHTML='<div class="rb-sshead" style="margin-bottom:4px"><button class="rb-iconbtn" id="rbAchBack">'+I.back+'</button><h2 style="margin-left:8px">업적</h2></div><div class="rb-achhead">'+done+' / '+ACHS.length+' 달성</div><div class="rb-achgrid">'+ACHS.map(function(x){var u=got.has(x.id);return '<div class="rb-ach'+(u?' on':'')+'"><div class="ic">'+(u?x.ic:'🔒')+'</div><div class="tx"><div class="t">'+x.t+'</div><div class="d">'+x.d+'</div></div></div>';}).join('')+'</div>';var bk=achScr.querySelector('#rbAchBack');if(bk)bk.onclick=function(){if(window.refreshRecords)window.refreshRecords();showScreen('recordsScreen');};}
+      function refreshAch(){var a=achStats();var got=achGot();var done=ACHS.filter(function(x){return got.has(x.id);}).length;achScr.innerHTML='<div class="rb-sshead" style="margin-bottom:4px"><h2>업적</h2></div><div class="rb-achhead">'+done+' / '+ACHS.length+' 달성</div><div class="rb-achgrid">'+ACHS.map(function(x){var u=got.has(x.id);return '<div class="rb-ach'+(u?' on':'')+'"><div class="ic">'+(u?x.ic:'🔒')+'</div><div class="tx"><div class="t">'+x.t+'</div><div class="d">'+x.d+'</div></div></div>';}).join('')+'</div>';}
       window.refreshAch=refreshAch;
       var achToast=document.createElement('div');achToast.id='rbAchToast';document.body.appendChild(achToast);var rbl=document.createElement('div');rbl.id='rbLoad';rbl.innerHTML='<div class="rbl-box"><div class="spin"></div><div>불러오는 중…</div></div>';document.body.appendChild(rbl);
       function achToastShow(list){if(!list||!list.length)return;achToast.innerHTML=list.map(function(x){return '<div class="rb-achtoast"><div class="ic">'+x.ic+'</div><div><div class="t">업적 달성!</div><div class="d">'+x.t+' — '+x.d+'</div></div></div>';}).join('');achToast.classList.add('on');setTimeout(function(){achToast.classList.remove('on');},4200);}
@@ -2492,11 +2612,49 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
       bkrow.querySelector('#rbImport').addEventListener('click',function(){impFile.click();});
       impFile.addEventListener('change',function(e){var fl=e.target.files[0];if(!fl)return;var rd=new FileReader();rd.onload=function(){try{var obj=JSON.parse(rd.result);var d=(obj&&obj.data)?obj.data:obj;if(!d||typeof d!=='object')throw 0;if(!confirm('백업을 불러오면 현재 기록을 덮어씁니다. 계속할까요?'))return;Object.keys(d).forEach(function(k){if(k.indexOf('rc_')===0)localStorage.setItem(k,d[k]);});location.reload();}catch(err){alert('올바른 백업 파일이 아니에요.');}};rd.readAsText(fl);e.target.value='';});
       var xrow=document.createElement("div");xrow.className="setrow";xrow.innerHTML='<div class="top"><span>데이터 초기화</span></div><button id="rbReset" style="background:linear-gradient(135deg,#FB7185,#EC4899)!important;box-shadow:0 8px 20px rgba(236,72,153,.35)!important;height:50px!important;font-size:14.5px!important;border-radius:15px!important;margin-top:6px">전체 초기화</button><div class="legend">기록·설정·키 지정·즐겨찾기를 모두 지우고 처음 상태로 되돌립니다.</div>';sr.appendChild(xrow);xrow.querySelector("#rbReset").addEventListener("click",function(){if(!confirm("정말 전체 초기화할까요?\n모든 기록·설정·즐겨찾기가 삭제되며 되돌릴 수 없습니다."))return;try{var ks=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("rc_")===0)ks.push(k);}ks.forEach(function(k){localStorage.removeItem(k);});}catch(e){}location.reload();});
+      // ── 건의함 (구글 폼) ──
+      var fbrow=document.createElement('div');fbrow.className='setrow';
+      fbrow.innerHTML='<div class="top"><span>건의함</span></div><button id="rbFeedback" class="rb-fbbtn">💬 의견 · 버그 보내기</button><div class="legend">버그 제보·기능 제안·곡 요청을 남겨주세요. 새 탭에서 구글 폼이 열려요.</div>';
+      sr.appendChild(fbrow);
+      fbrow.querySelector('#rbFeedback').addEventListener('click',function(){window.open('https://forms.gle/NkD4dhHTJdEassAz8','_blank','noopener');});
+      // ── 앱 정보 · 이용약관 · 개인정보 · 폰트 저작권 ──
+      var INFO={
+        howto:{t:'이용 방법',h:'<h3>기본</h3><p>4개 레인으로 노트가 판정선까지 내려옵니다. 노트가 <b>선에 닿는 순간</b> 그 레인을 터치하세요. 아래 패드뿐 아니라 레인 어디를 눌러도 됩니다.</p><h3>판정</h3><p><b>PERFECT · GREAT · GOOD</b> 순으로 정확할수록 점수가 높고, 놓치면 <b>MISS</b>예요. 정확도에 따라 최종 등급 <b>SS·S·A·B·C·D</b>가 매겨집니다.</p><h3>롱노트</h3><p>긴 노트는 선에 닿는 순간부터 <b>끝까지 누르고</b> 있어야 합니다. 흐르는 줄무늬가 있는 노트예요.</p><h3>콤보 · 피버</h3><p>콤보가 이어질수록 화면이 점점 뜨거워지고(12·30·60·100), FEVER 게이지가 차면 잠시 점수가 배로 들어옵니다.</p><h3>조작</h3><ul><li>모바일: 화면 터치(멀티터치 지원)</li><li>PC: 기본 <b>D · F · J · K</b> (설정에서 변경)</li><li>일시정지: 상단 버튼 또는 Esc</li></ul>'},
+        notice:{t:'공지사항',h:'<h3>v1.0 · 오픈 베타</h3><p>리듬베르는 현재 <b>오픈 베타(얼리 액세스)</b> 단계예요. 기능이 계속 추가·개선되며 밸런스나 UI가 바뀔 수 있습니다.</p><h3>최근 업데이트</h3><ul><li>레인 전체 터치 입력 · 멀티터치</li><li>판정 창 표준화(기본 난이도 NORMAL)</li><li>롱노트 가시성 개선</li><li>지그재그 · 계단 패턴 추가</li><li>콤보 고조 연출 + 가속 효과음</li><li>곡 카드 등급 메달(SS~D)</li></ul><p class="muted">기록은 기기에 저장돼요. 설정 &gt; 기록 백업으로 안전하게 보관하세요.</p>'},
+        terms:{t:'이용약관',h:'<p>본 약관은 개인이 취미로 제작한 무료 리듬 게임 <b>리듬베르</b>의 이용에 적용됩니다.</p><h3>1. 서비스</h3><p>별도의 회원가입 없이 누구나 무료로 이용할 수 있습니다. 서비스 내용은 사전 고지 없이 변경·중단될 수 있습니다.</p><h3>2. 이용자 콘텐츠</h3><p>이용자가 추가한 음악 파일은 <b>이용자 본인의 브라우저에서만</b> 처리되며 서버로 전송되지 않습니다. 해당 파일의 저작권 준수 책임은 이용자에게 있습니다.</p><h3>3. 책임의 한계</h3><p>본 게임은 “있는 그대로” 제공됩니다. 제작자는 오류·중단·데이터 손실 등에 대해 관련 법이 허용하는 범위에서 책임을 지지 않습니다.</p><h3>4. 문의</h3><p>GitHub 저장소를 통해 의견을 남겨주세요.</p><p class="muted">본 약관은 예시 문구입니다. 실제 배포 조건에 맞게 제작자가 수정할 수 있습니다.</p>'},
+        privacy:{t:'개인정보처리방침',h:'<p><b>리듬베르는 어떤 개인정보도 서버로 수집·전송하지 않습니다.</b></p><h3>저장되는 정보</h3><ul><li>게임 기록·설정·즐겨찾기 → 이용자 기기의 브라우저 저장소(localStorage)에만 저장</li><li>추가한 음악 파일 → 업로드 없이 브라우저 안에서만 재생</li></ul><h3>사용하지 않는 것</h3><p>쿠키 기반 추적, 광고, 분석 도구를 사용하지 않습니다.</p><h3>데이터 관리</h3><p>브라우저 데이터를 삭제하면 저장된 기록도 함께 사라집니다. 설정 &gt; 기록 백업에서 파일로 내보내거나 복원할 수 있어요.</p><h3>호스팅</h3><p>본 게임은 GitHub Pages로 제공되며, 접속 시 표준 서버 접속 로그(예: IP 주소)가 GitHub 측에 남을 수 있습니다.</p>'},
+        font:{t:'폰트 저작권',h:'<p>리듬베르에 사용된 글꼴과 라이선스입니다.</p><h3>Paperlogy (페이퍼로지)</h3><p>본문·UI 기본 글꼴. <b>SIL 오픈 폰트 라이선스(OFL)</b> — 개인·상업용 무료. 제작: 핏쿤 이주임 · 페이퍼로지 김도균.</p><h3>Pretendard</h3><p>보조 글꼴. <b>SIL Open Font License 1.1</b> — 길형진(orioncactus).</p><h3>구름소파 남김체 (로고)</h3><p>“리듬베르” 로고에 쓰인 손글씨 글꼴. Calligraphr로 제작·임베드했습니다.</p><p class="muted">각 글꼴은 해당 라이선스에 따라 사용되었습니다. 로고 글꼴의 원출처·라이선스는 배포 전 한 번 더 확인하는 것을 권장해요.</p>'}
+      };
+      var infoModal=document.getElementById('rbInfoModal');
+      if(!infoModal){infoModal=document.createElement('div');infoModal.id='rbInfoModal';infoModal.className='overlay hidden';stage.appendChild(infoModal);}
+      function rbOpenInfo(key){var d=INFO[key];if(!d)return;infoModal.innerHTML='<div class="rb-sshead" style="margin-bottom:6px"><button class="rb-iconbtn" id="rbInfoBack">'+I.back+'</button><h2 style="margin-left:8px">'+d.t+'</h2></div><div class="rb-infobody">'+d.h+'</div>';infoModal.classList.remove('hidden');var bk=infoModal.querySelector('#rbInfoBack');if(bk)bk.onclick=function(){infoModal.classList.add('hidden');};}
+      var irow=document.createElement('div');irow.className='setrow';
+      irow.innerHTML='<div class="top"><span>앱 정보 · 약관</span></div><div class="rb-infolist">'+[['howto','이용 방법'],['notice','공지사항'],['terms','이용약관'],['privacy','개인정보처리방침'],['font','폰트 저작권']].map(function(o){return '<button class="rb-infoitem" data-i="'+o[0]+'">'+o[1]+'</button>';}).join('')+'</div><div class="rb-ver">리듬베르 <b>v1.0</b> · 오픈 베타</div>';
+      sr.appendChild(irow);
+      irow.querySelector('.rb-infolist').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(b)rbOpenInfo(b.dataset.i);});
       function rbState(){var el=krow.querySelector('#rbCustomState');if(el){el.textContent=useCustom?'사용 중':'미사용';}}
       function renderCaps(){var c=krow.querySelector('#rbKeyCap');if(!c)return;c.innerHTML='';for(var i=0;i<4;i++){(function(i){var b=document.createElement('div');b.className='lay';b.style.cssText='flex:1;text-align:center;line-height:1.25;cursor:pointer;';b.innerHTML='<div style="font-size:9px;color:#9A93AE;font-weight:700">레인 '+(i+1)+'</div><div class="kk" style="font-size:16px;font-weight:800">'+kdisp(customKeys[i])+'</div>';b.onclick=function(){capKey(i,b);};c.appendChild(b);})(i);}}
       function capKey(idx,b){b.querySelector('.kk').textContent='?';b.classList.add('sel');var h=function(ev){if(ev.code==='Escape'){window.removeEventListener('keydown',h,true);renderCaps();return;}ev.preventDefault();ev.stopPropagation();customKeys[idx]=ev.code;try{localStorage.setItem('rc_customkeys',JSON.stringify(customKeys));}catch(e){}useCustom=true;try{localStorage.setItem('rc_usecustom','1');}catch(e){}applyCustom();window.removeEventListener('keydown',h,true);renderCaps();rbState();};window.addEventListener('keydown',h,true);}
       renderCaps();rbState();
       var lrEl=document.getElementById('layoutRow');if(lrEl){lrEl.addEventListener('click',function(ev){if(ev.target.closest('.lay')){useCustom=false;try{localStorage.setItem('rc_usecustom','0');}catch(e){}rbState();}});}
+      // ── 설정 섹션별 정리(재배치) ──
+      (function(){
+        var box=document.querySelector('#settingsScreen .setrows'); if(!box) return;
+        var byInput=function(id){var el=box.querySelector('#'+id);return el?el.closest('.setrow'):null;};
+        var groups=[
+          ['🔊 사운드',      [byInput('sMusic'), byInput('sSfx'), hrow]],
+          ['🎮 게임플레이',  [byInput('sSpeed'), byInput('sOffset'), byInput('sNofail'), mrow]],
+          ['🎨 화면 · 테마', [orow, lrow, arow, trow, skrow, cbrow]],
+          ['⌨️ 조작',        [byInput('sKeyboard'), krow]],
+          ['💾 데이터',      [bkrow, xrow]],
+          ['ℹ️ 정보 · 지원', [fbrow, irow]]
+        ];
+        groups.forEach(function(g){
+          var head=document.createElement('div'); head.className='setgroup'; head.textContent=g[0];
+          box.appendChild(head);
+          g[1].forEach(function(r){ if(r) box.appendChild(r); });   // appendChild가 기존 노드를 이동시켜 재배치
+        });
+      })();
       }
       try{var _ls=localStorage.getItem('rc_screen');if(_ls&&_ls!=='menuScreen'&&document.getElementById(_ls)){if(_ls==='songScreen')refreshSongList();else if(_ls==='recordsScreen')refreshRecords();showScreen(_ls);}}catch(e){}
   }
