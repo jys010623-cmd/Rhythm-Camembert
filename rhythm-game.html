@@ -1986,6 +1986,15 @@ body.rb-playing.rb-aurora #rbAurora{display:block;}
 #rbAurora i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.6;mix-blend-mode:screen;}
 /* perf: during play, freeze aurora + drop blend/blur so the compositor isn't saturated (matters on low-end/mobile — rhythm timing) */
 body.rb-playing #rbAurora i{animation:none!important;mix-blend-mode:normal!important;filter:blur(52px)!important;opacity:.3!important;}
+/* ---- unified desktop layout: 5 main screens = same width, centered container, header+content aligned (sidebar stays fixed-left) ---- */
+@media(min-width:1024px){
+  html body #menuScreen,html body #songScreen,html body #recordsScreen,html body #achScreen,html body #settingsScreen{align-items:center!important;justify-content:flex-start!important;padding:48px 44px 84px!important;}
+  html body #menuScreen>*,html body #songScreen>*,html body #recordsScreen>*,html body #achScreen>*,html body #settingsScreen>*{max-width:1140px!important;width:100%!important;margin-left:auto!important;margin-right:auto!important;}
+  html body #menuScreen>.rb-top,html body #menuScreen>.rb-homegrid{max-width:1140px!important;}
+  html body #settingsScreen .setrows{max-width:1140px!important;}
+  html body #recordsScreen .rb-rcols{max-width:1140px!important;column-count:1!important;}
+  html body #achScreen .rb-achgrid{max-width:1140px!important;grid-template-columns:repeat(3,1fr)!important;}
+}
 #rbAurora .a1{width:48%;height:48%;background:radial-gradient(circle,#A78BFA,transparent 70%);top:-10%;left:-6%;animation:aur1 15s ease-in-out infinite;}
 #rbAurora .a2{width:52%;height:52%;background:radial-gradient(circle,#F472B6,transparent 70%);bottom:-14%;right:-8%;animation:aur2 19s ease-in-out infinite;}
 #rbAurora .a3{width:46%;height:46%;background:radial-gradient(circle,#60A5FA,transparent 70%);top:30%;left:60%;animation:aur3 17s ease-in-out infinite;}
@@ -2152,7 +2161,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
 </style>
 <script>
 (function(){
-  var RB_MYSONGS=[{id:'my_kkam',title:'까망베르',artist:'Suno · 내 곡',genre:'kkam',bpm:100,file:'까망베르.mp3'},{id:'my_game',title:'까망베르 게임중',artist:'Suno · 내 곡',genre:'kkam',bpm:100,file:'까망베르 게임중.mp3'},{id:'my_school',title:'까망베르의 등교',artist:'Suno · 내 곡',genre:'kkam',bpm:100,file:'까망베르의 등교.mp3'},{id:'my_cloud',title:'구름',artist:'Suno · 로파이',genre:'lofi',bpm:100,file:'구름.mp3'},{id:'my_cloud2',title:'구름 2',artist:'Suno · 로파이',genre:'lofi',bpm:100,file:'구름 (1).mp3'}];
+  var RB_MYSONGS=[{id:'my_kkam',title:'까망베르',artist:'Suno · 내 곡',genre:'kkam',bpm:133,file:'까망베르.mp3'},{id:'my_game',title:'까망베르 게임중',artist:'Suno · 내 곡',genre:'kkam',bpm:88,file:'까망베르 게임중.mp3'},{id:'my_school',title:'까망베르의 등교',artist:'Suno · 내 곡',genre:'kkam',bpm:129,file:'까망베르의 등교.mp3'},{id:'my_cloud',title:'구름',artist:'Suno · 로파이',genre:'lofi',bpm:89,file:'구름.mp3'},{id:'my_cloud2',title:'구름 2',artist:'Suno · 로파이',genre:'lofi',bpm:157,file:'구름 (1).mp3'}];
   function boot(){
     var stage=document.getElementById('stage');
     if(!stage || typeof showScreen!=='function'){ return setTimeout(boot,150); }
