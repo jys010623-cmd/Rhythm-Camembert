@@ -1,0 +1,15 @@
+{
+  "name": "리듬베르 · Rhythm-Camembert",
+  "short_name": "리듬베르",
+  "description": "까망베르 고양이와 함께하는 리듬 게임",
+  "start_url": "./rhythm-game.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#160f2c",
+  "theme_color": "#8B5CF6",
+  "lang": "ko",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
