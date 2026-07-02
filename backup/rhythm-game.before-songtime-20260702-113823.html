@@ -140,7 +140,7 @@
   }
   .lane::before{content:"";position:absolute;inset:0;border-left:1px solid rgba(167,139,250,.10);border-right:1px solid rgba(167,139,250,.10);}
   .note{
-    position:absolute;left:3%;width:94%;height:36px;border-radius:9px;
+    position:absolute;left:6%;width:88%;height:24px;border-radius:8px;
     box-shadow:0 0 16px rgba(167,139,250,.55), inset 0 1px 0 rgba(255,255,255,.55);
     will-change:transform,height;
   }
@@ -966,7 +966,7 @@ function stopMusic(){
 let running=false, paused=false, raf=0;
 let score=0, combo=0, maxCombo=0, life=LIFE_MAX, failed=false;
 let counts={PERFECT:0,GREAT:0,GOOD:0,MISS:0}, totalNotes=0;
-let laneH=0, lineY=0, laneCenter=[0,0,0,0], fxW=0, fxH=0, NOTE_H=36;
+let laneH=0, lineY=0, laneCenter=[0,0,0,0], fxW=0, fxH=0;
 const fx=$('#fx'), fxc=fx.getContext('2d');
 let particles=[];
 let hitErrors=[];   // signed per-hit timing error (ms, + = late) for result summary
@@ -993,8 +993,6 @@ const down=[false,false,false,false];
 
 function layout(){
   laneH = lanesEl[0].clientHeight;
-  const _lw = lanesEl[0].clientWidth;
-  NOTE_H = Math.round(Math.max(30, Math.min(56, _lw*0.55)));   // 레인 폭에 비례한 노트 두께
   lineY = laneH - Math.max(60, Math.round(laneH*0.11));
   $('#hitline').style.top = (lanesEl[0].offsetTop + lineY) + 'px';
   const lanesBox=$('#lanes');
@@ -1049,8 +1047,6 @@ function spawnNote(n){
   if(n.hold){
     n.durPx = Math.max(8,(n.dur/approach)*lineY);
     el.style.height=(n.durPx+32)+'px';
-  } else {
-    el.style.height=NOTE_H+'px';
   }
   lanesEl[n.lane].appendChild(el);
   n.el=el;
@@ -1112,7 +1108,7 @@ function loop(){
     } else {
       if(!n.hit){
         const prog=1-(n.t-sT)/approach;
-        n.el.style.transform=`translateY(${prog*lineY - NOTE_H/2}px)`;   // 노트 중심을 판정선에 정렬
+        n.el.style.transform=`translateY(${prog*lineY}px)`;
         if(MODS.hidden) n.el.style.opacity=Math.max(0,Math.min(1,(0.82-prog)/0.32));
         if(n.t-sT < -W_MISS && !n.missed){ n.missed=true; registerMiss(n.lane); removeEl(n); }
       }
@@ -2335,7 +2331,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
 </style>
 <script>
 (function(){
-  var RB_MYSONGS=[{id:'my_kkam',title:'까망베르',artist:'Suno',genre:'kkam',bpm:133,dur:61,file:'까망베르.mp3'},{id:'my_game',title:'까망베르 게임중',artist:'Suno',genre:'kkam',bpm:88,dur:92,file:'까망베르 게임중.mp3'},{id:'my_school',title:'까망베르의 등교',artist:'Suno',genre:'kkam',bpm:129,dur:89,file:'까망베르의 등교.mp3'},{id:'my_cloud',title:'구름',artist:'Suno · 로파이',genre:'lofi',bpm:89,dur:61,file:'구름.mp3'},{id:'my_cloud2',title:'구름 2',artist:'Suno · 로파이',genre:'lofi',bpm:157,dur:124,file:'구름 (1).mp3'}];
+  var RB_MYSONGS=[{id:'my_kkam',title:'까망베르',artist:'Suno · 내 곡',genre:'kkam',bpm:133,file:'까망베르.mp3'},{id:'my_game',title:'까망베르 게임중',artist:'Suno · 내 곡',genre:'kkam',bpm:88,file:'까망베르 게임중.mp3'},{id:'my_school',title:'까망베르의 등교',artist:'Suno · 내 곡',genre:'kkam',bpm:129,file:'까망베르의 등교.mp3'},{id:'my_cloud',title:'구름',artist:'Suno · 로파이',genre:'lofi',bpm:89,file:'구름.mp3'},{id:'my_cloud2',title:'구름 2',artist:'Suno · 로파이',genre:'lofi',bpm:157,file:'구름 (1).mp3'}];
   function boot(){
     var stage=document.getElementById('stage');
     if(!stage || typeof showScreen!=='function'){ return setTimeout(boot,150); }
@@ -2370,12 +2366,11 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     function saveFav(s){try{localStorage.setItem('rc_fav',JSON.stringify(Array.from(s)));}catch(e){}}
     function recents(){try{return JSON.parse(localStorage.getItem('rc_recent')||'[]');}catch(e){return [];}}
     function pushRecent(){try{if(typeof curSong==='undefined'||!curSong||!curSong.id)return;var r=recents().filter(function(x){return x!==curSong.id;});r.unshift(curSong.id);localStorage.setItem('rc_recent',JSON.stringify(r.slice(0,8)));}catch(e){}}
-    function fmtDur(s){if(!s&&s!==0)return '';s=Math.round(s);var m=Math.floor(s/60),ss=s%60;return m+':'+(ss<10?'0':'')+ss;}
     function starN(bpm){return bpm<100?3:bpm<140?4:5;}
     function starHTML(n){var h='';for(var i=1;i<=5;i++)h+='<span'+(i<=n?'':' class="o"')+'>★</span>';return '<span class="rb-stars">'+h+'</span>';}
     var DIFFNAMES={1:'EASY',2:'EASY+',3:'NORMAL',4:'NORMAL+',5:'HARD',6:'HARD+',7:'EXPERT',8:'EXPERT+',9:'MASTER',10:'MASTER+'};
     var DIFFCLS={1:'e',2:'e',3:'n',4:'n',5:'h',6:'h',7:'x',8:'x',9:'m',10:'m'};
-    if(typeof DIFFS!=='undefined'){var DC=[[0.30,0,0,0,0.08,2.45,0.58],[0.42,0,0,0,0.10,2.15,0.50],[0.55,0.05,0,0,0.11,1.95,0.42],[0.68,0.15,0,0.02,0.12,1.75,0.35],[0.80,0.28,0.03,0.04,0.12,1.58,0.29],[0.90,0.42,0.08,0.07,0.15,1.45,0.24],[0.95,0.55,0.16,0.10,0.16,1.32,0.20],[0.98,0.70,0.30,0.14,0.16,1.20,0.17],[1.00,0.85,0.48,0.20,0.14,1.08,0.14],[1.00,0.98,0.66,0.26,0.12,0.98,0.11]];for(var di=0;di<10;di++){var d=DC[di];DIFFS[di+1]={name:DIFFNAMES[di+1],dens:d[0],eighth:d[1],six:d[2],chord:d[3],hold:d[4],approach:d[5],gap:d[6]};}} if(typeof SONGS!=="undefined"){SONGS.forEach(function(s){s.bars=Math.max(16,Math.round(s.bpm/4));});} if(typeof SONGS!=="undefined"&&RB_MYSONGS&&RB_MYSONGS.length){RB_MYSONGS.forEach(function(m){if(!SONGS.some(function(x){return x.id===m.id;}))SONGS.push({id:m.id,title:m.title,artist:m.artist,genre:m.genre||'',bpm:m.bpm||100,dur:m.dur||0,bars:16,embed:true,src:'music/'+encodeURIComponent(m.file||(m.title+'.mp3'))});});try{if(typeof fetch==="function"){var _pl=SONGS.filter(function(s){return s.embed;})[0];if(_pl){initAudio();fetch(_pl.src).then(function(r){return r.arrayBuffer();}).then(function(a){return ac.decodeAudioData(a);}).then(function(buf){_pl._buf=buf;_pl._onsets=detectOnsets(buf);}).catch(function(){});}}}catch(e){}}
+    if(typeof DIFFS!=='undefined'){var DC=[[0.30,0,0,0,0.08,2.45,0.58],[0.42,0,0,0,0.10,2.15,0.50],[0.55,0.05,0,0,0.11,1.95,0.42],[0.68,0.15,0,0.02,0.12,1.75,0.35],[0.80,0.28,0.03,0.04,0.12,1.58,0.29],[0.90,0.42,0.08,0.07,0.15,1.45,0.24],[0.95,0.55,0.16,0.10,0.16,1.32,0.20],[0.98,0.70,0.30,0.14,0.16,1.20,0.17],[1.00,0.85,0.48,0.20,0.14,1.08,0.14],[1.00,0.98,0.66,0.26,0.12,0.98,0.11]];for(var di=0;di<10;di++){var d=DC[di];DIFFS[di+1]={name:DIFFNAMES[di+1],dens:d[0],eighth:d[1],six:d[2],chord:d[3],hold:d[4],approach:d[5],gap:d[6]};}} if(typeof SONGS!=="undefined"){SONGS.forEach(function(s){s.bars=Math.max(16,Math.round(s.bpm/4));});} if(typeof SONGS!=="undefined"&&RB_MYSONGS&&RB_MYSONGS.length){RB_MYSONGS.forEach(function(m){if(!SONGS.some(function(x){return x.id===m.id;}))SONGS.push({id:m.id,title:m.title,artist:m.artist,genre:m.genre||'',bpm:m.bpm||100,bars:16,embed:true,src:'music/'+encodeURIComponent(m.file||(m.title+'.mp3'))});});try{if(typeof fetch==="function"){var _pl=SONGS.filter(function(s){return s.embed;})[0];if(_pl){initAudio();fetch(_pl.src).then(function(r){return r.arrayBuffer();}).then(function(a){return ac.decodeAudioData(a);}).then(function(buf){_pl._buf=buf;_pl._onsets=detectOnsets(buf);}).catch(function(){});}}}catch(e){}}
     function curLevel(){return (typeof level!=='undefined')?level:2;}
     var state={filter:'all',query:''};
     var selected=null;
@@ -2409,7 +2404,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     song.querySelector('#rbChips').addEventListener('click',function(e){var c=e.target.closest('[data-f]');if(!c)return;state.filter=c.dataset.f;song.querySelectorAll('#rbChips .rb-chip').forEach(function(x){x.classList.toggle('on',x===c);});buildSongList();});
     function bestAny(id){var b=null;for(var lv=1;lv<=10;lv++){var r=getBest(id,lv);if(r&&(!b||r.score>b.score)){b=r;b._lv=lv;}}return b;}
     function gradeMedal(b){if(!b)return '';var r=b.rank||'D';var tier=(r==='SS')?'ss':(r==='S')?'s':(r==='A')?'a':(r==='B')?'b':(r==='C')?'c':'d';var extra=b.ap?' ap':(b.fc?' fc':'');return '<span class="rb-grade g-'+tier+extra+'" title="최고 '+(b.ap?'ALL PERFECT ':(b.fc?'FULL COMBO ':''))+r+' · '+b.acc+'%">'+r+'</span>';}
-    function buildSongList(){var list=document.getElementById('songList');if(!list)return;var favs=favSet(),rec=recents();list.innerHTML='';var items=SONGS.map(function(s,i){return {s:s,i:i};});if(state.filter.indexOf('g:')===0){var _g=state.filter.slice(2);items=items.filter(function(o){return o.s.genre===_g;});}if(state.filter==='fav')items=items.filter(function(o){return favs.has(o.s.id);});if(state.filter==='recent')items=items.filter(function(o){return rec.indexOf(o.s.id)>=0;});if(state.query)items=items.filter(function(o){return (o.s.title+' '+o.s.artist).toLowerCase().indexOf(state.query)>=0;});if(!items.length)list.innerHTML='<div class="rb-empty">조건에 맞는 곡이 없어요.</div>';items.forEach(function(o){var s=o.s,i=o.i,best=bestAny(s.id),fav=favs.has(s.id);var card=document.createElement('div');card.className='rb-scard'+(best?' cleared':'');card.innerHTML='<div class="cv">'+cover(s.id)+gradeMedal(best)+'</div><div class="mt"><div class="t">'+s.title+'</div><div class="d">'+s.artist+' · BPM '+s.bpm+(s.dur?' · '+fmtDur(s.dur):'')+'</div>'+starHTML(starN(s.bpm))+'</div><button class="rb-fav'+(fav?' on':'')+'" data-fav>'+I.heart+'</button><div class="rb-best"><div class="k">'+(best?'Lv.'+best._lv:'BEST')+'</div><div class="v">'+(best?best.rank+' · '+best.acc+'%':DASH)+'</div></div><button class="rb-pl">'+I.play+'</button>';card.querySelector('[data-fav]').onclick=function(ev){ev.stopPropagation();var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);buildSongList();};card.onclick=function(){openDetail(s,i);};list.appendChild(card);});if(state.filter==='all'){var up=document.createElement('div');up.className='rb-scard rb-up';up.textContent='＋ 내 음악 파일 추가 (mp3 등)';up.onclick=function(){fileInput.click();};list.appendChild(up);}}
+    function buildSongList(){var list=document.getElementById('songList');if(!list)return;var favs=favSet(),rec=recents();list.innerHTML='';var items=SONGS.map(function(s,i){return {s:s,i:i};});if(state.filter.indexOf('g:')===0){var _g=state.filter.slice(2);items=items.filter(function(o){return o.s.genre===_g;});}if(state.filter==='fav')items=items.filter(function(o){return favs.has(o.s.id);});if(state.filter==='recent')items=items.filter(function(o){return rec.indexOf(o.s.id)>=0;});if(state.query)items=items.filter(function(o){return (o.s.title+' '+o.s.artist).toLowerCase().indexOf(state.query)>=0;});if(!items.length)list.innerHTML='<div class="rb-empty">조건에 맞는 곡이 없어요.</div>';items.forEach(function(o){var s=o.s,i=o.i,best=bestAny(s.id),fav=favs.has(s.id);var card=document.createElement('div');card.className='rb-scard'+(best?' cleared':'');card.innerHTML='<div class="cv">'+cover(s.id)+gradeMedal(best)+'</div><div class="mt"><div class="t">'+s.title+'</div><div class="d">'+s.artist+' · BPM '+s.bpm+'</div>'+starHTML(starN(s.bpm))+'</div><button class="rb-fav'+(fav?' on':'')+'" data-fav>'+I.heart+'</button><div class="rb-best"><div class="k">'+(best?'Lv.'+best._lv:'BEST')+'</div><div class="v">'+(best?best.rank+' · '+best.acc+'%':DASH)+'</div></div><button class="rb-pl">'+I.play+'</button>';card.querySelector('[data-fav]').onclick=function(ev){ev.stopPropagation();var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);buildSongList();};card.onclick=function(){openDetail(s,i);};list.appendChild(card);});if(state.filter==='all'){var up=document.createElement('div');up.className='rb-scard rb-up';up.textContent='＋ 내 음악 파일 추가 (mp3 등)';up.onclick=function(){fileInput.click();};list.appendChild(up);}}
     var detail=document.createElement('div');detail.className='overlay hidden';detail.id='detailScreen';stage.appendChild(detail);
     var previewNode=null,previewTimer=null,previewSong=null;
     function stopPreview(){if(previewNode){try{previewNode.stop();}catch(e){}previewNode=null;}if(previewTimer){clearTimeout(previewTimer);previewTimer=null;}previewSong=null;var b=document.getElementById('dPreview');if(b){b.classList.remove('on');b.innerHTML=I.play+' 미리듣기';}}
@@ -2421,7 +2416,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
       else if(typeof fetch==='function'){btn.innerHTML='… 불러오는 중';fetch(song.src).then(function(r){return r.arrayBuffer();}).then(function(a){return ac.decodeAudioData(a);}).then(function(buf){song._buf=buf;song._onsets=detectOnsets(buf);go(buf);}).catch(function(){stopPreview();});}
     }
     function warmSong(s){if(!s||!s.embed||s._buf||typeof fetch!=='function')return;try{SONGS.forEach(function(o){if(o.embed&&o!==s){o._buf=null;o._onsets=null;}});}catch(e){}try{initAudio();}catch(e){}fetch(s.src).then(function(r){return r.arrayBuffer();}).then(function(a){return ac.decodeAudioData(a);}).then(function(buf){s._buf=buf;s._onsets=detectOnsets(buf);}).catch(function(){});}
-    function openDetail(s,i){selected={s:s,i:i};var fav=favSet().has(s.id);detail.innerHTML='<div class="ambient"><i class="a"></i><i class="c"></i></div><div class="rb-dtop"><button class="rb-iconbtn" id="dBack">'+I.back+'</button><button class="rb-iconbtn'+(fav?' on':'')+'" id="dFav" style="'+(fav?'color:var(--pink)':'')+'">'+I.heart+'</button></div><div class="rb-dgrid"><div class="rb-dleft"><div class="rb-dcover">'+cover(s.id)+'</div></div><div class="rb-dright"><div class="rb-dtitle"><h2>'+s.title+'</h2><div class="rb-dmeta"><span>'+s.artist+'</span><span>·</span><span>BPM '+s.bpm+'</span>'+(s.dur?'<span>·</span><span>'+fmtDur(s.dur)+'</span>':'')+'</div></div><button id="dPreview" class="rb-prevbtn">'+I.play+' 미리듣기</button><div class="rb-h" style="margin:28px 0 14px">난이도</div><div class="rb-ddiff" id="dDiff"></div><div class="rb-h" style="margin:30px 0 14px">기록</div><div class="rb-dstats" id="dStats"></div><button id="dStart" class="rb-bigbtn" style="margin-top:32px">'+I.play+' 게임 시작</button></div></div>';detail.querySelector('#dBack').onclick=function(){showScreen('songScreen');};detail.querySelector('#dFav').onclick=function(){var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);openDetail(s,i);};detail.querySelector('#dStart').onclick=function(){stopPreview();try{initAudio();}catch(e){} curSong=s; startGame();};var _pv=detail.querySelector('#dPreview');if(_pv)_pv.onclick=function(){rbPreview(s,_pv);};warmSong(s);paintDetailDiff();paintDetailStats();showScreen('detailScreen');}
+    function openDetail(s,i){selected={s:s,i:i};var fav=favSet().has(s.id);detail.innerHTML='<div class="ambient"><i class="a"></i><i class="c"></i></div><div class="rb-dtop"><button class="rb-iconbtn" id="dBack">'+I.back+'</button><button class="rb-iconbtn'+(fav?' on':'')+'" id="dFav" style="'+(fav?'color:var(--pink)':'')+'">'+I.heart+'</button></div><div class="rb-dgrid"><div class="rb-dleft"><div class="rb-dcover">'+cover(s.id)+'</div></div><div class="rb-dright"><div class="rb-dtitle"><h2>'+s.title+'</h2><div class="rb-dmeta"><span>'+s.artist+'</span><span>·</span><span>BPM '+s.bpm+'</span></div></div><button id="dPreview" class="rb-prevbtn">'+I.play+' 미리듣기</button><div class="rb-h" style="margin:28px 0 14px">난이도</div><div class="rb-ddiff" id="dDiff"></div><div class="rb-h" style="margin:30px 0 14px">기록</div><div class="rb-dstats" id="dStats"></div><button id="dStart" class="rb-bigbtn" style="margin-top:32px">'+I.play+' 게임 시작</button></div></div>';detail.querySelector('#dBack').onclick=function(){showScreen('songScreen');};detail.querySelector('#dFav').onclick=function(){var f=favSet();if(f.has(s.id))f.delete(s.id);else f.add(s.id);saveFav(f);openDetail(s,i);};detail.querySelector('#dStart').onclick=function(){stopPreview();try{initAudio();}catch(e){} curSong=s; startGame();};var _pv=detail.querySelector('#dPreview');if(_pv)_pv.onclick=function(){rbPreview(s,_pv);};warmSong(s);paintDetailDiff();paintDetailStats();showScreen('detailScreen');}
     function paintDetailDiff(){var h=detail.querySelector('#dDiff');if(!h)return;h.innerHTML='';for(var lv=1;lv<=10;lv++){var p=document.createElement('div');p.className='p '+DIFFCLS[lv]+(lv===curLevel()?' sel':'');p.dataset.d=lv;p.innerHTML=lv+'<small>'+DIFFNAMES[lv]+'</small>';h.appendChild(p);}h.onclick=function(e){var p=e.target.closest('[data-d]');if(!p)return;level=parseInt(p.dataset.d,10);paintDetailDiff();paintDetailStats();};}
     function paintDetailStats(){var h=detail.querySelector('#dStats');if(!h)return;var b=getBest(selected.s.id,curLevel());h.innerHTML='<div class="rb-card"><div class="k">BEST</div><div class="v acc">'+(b?b.acc+'%':DASH)+'</div></div><div class="rb-card"><div class="k">MAX COMBO</div><div class="v">'+(b?b.combo:DASH)+'</div></div><div class="rb-card"><div class="k">RANK</div><div class="v">'+(b?b.rank:DASH)+'</div></div>';}
     var records=document.createElement('div');records.className='overlay hidden';records.id='recordsScreen';stage.appendChild(records);
@@ -2665,10 +2660,4 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
    위아래·양옆에 여백과 둥근 코너가 보이던 문제 → 모바일에선 화면을 꽉 채움 */
 @media(max-width:767px){
   body.rb-playing{align-items:stretch!important;justify-content:flex-start!important;}
-  body.rb-playing #stage{width:100vw!important;height:100dvh!important;max-width:none!important;
-    margin:0!important;border-radius:0!important;border:none!important;box-shadow:none!important;}
-}
-</style>
-
-</body>
-</html>
+  body.rb-playing #stage{width:
