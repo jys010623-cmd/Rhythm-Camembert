@@ -802,7 +802,68 @@ let uploadBuffer=null; // decoded AudioBuffer for uploads
 let SPB=0, TOTAL_BEATS=0;
 let approach=1.6;
 
-/* (내장 신스곡용 buildChartSynth 제거됨 — 모든 곡은 buildChartFromOnsets 사용) */
+function buildChartSynth(song, lv){
+  chart=[];
+  const cfg=DIFFS[lv];
+  SPB = 60/song.bpm;
+  TOTAL_BEATS = song.bars*4;
+  approach = cfg.approach / settings.speed;
+  songLen = TOTAL_BEATS*SPB;
+  let lastLane=-1;
+  const laneFreeAt=[0,0,0,0];   // beat until which lane is occupied by a hold
+  let runLeft=0, runDir=1;      // 계단/지그재그 스트림 상태
+  const pick=()=>{
+    let l=Math.floor(Math.random()*4), tries=0;
+    while((l===lastLane || laneFreeAt[l]>0) && tries<8){ l=(l+1)%4; tries++; }
+    lastLane=l; return l;
+  };
+  const pickStep=()=>{           // 이전 레인에서 한 칸씩 이동(양끝에서 튕겨 지그재그)
+    if(lastLane<0) return pick();
+    let l=lastLane+runDir;
+    if(l>3){ l=2; runDir=-1; } else if(l<0){ l=1; runDir=1; }
+    if(laneFreeAt[l]>0) return pick();
+    lastLane=l; return l;
+  };
+  const add=(beat,lane,holdBeats)=>{
+    const dur=(holdBeats||0)*SPB;
+    chart.push({t:beat*SPB, lane, dur, hold:dur>0, el:null, hit:false,
+      headHit:false, holding:false, missed:false, tailDone:false, broken:false, durPx:0, lastTick:0});
+    if(dur>0) laneFreeAt[lane]=beat+holdBeats+0.5;
+  };
+  const steps = TOTAL_BEATS*4;   // 16th grid
+  for(let s=0;s<steps;s++){
+    const beat=s/4;
+    for(let l=0;l<4;l++) if(laneFreeAt[l]>0 && beat>=laneFreeAt[l]) laneFreeAt[l]=0;
+    if(beat<1){ if(s===2) add(0.5, pick(), 0); continue; } // lead-in
+    let p;
+    if(s%4===0) p=cfg.dens; else if(s%2===0) p=cfg.eighth; else p=cfg.six;
+    if(Math.random()<p){
+      const stream = (s%4!==0);          // 정박이 아닌 잔음 = 스트림 후보
+      let lane, inRun=false;
+      if(runLeft>0){ lane=pickStep(); runLeft--; inRun=true; }
+      else if(stream && cfg.eighth>0.35 && Math.random()<0.30){
+        runDir = Math.random()<0.5?1:-1;
+        runLeft = 3+Math.floor(Math.random()*3);   // 3~5연속 계단/지그재그
+        lane=pickStep(); runLeft--; inRun=true;
+      } else {
+        lane=pick();
+      }
+      // 홀드·코드는 스트림 중엔 넣지 않아 깔끔한 계단이 유지됨
+      let holdBeats=0;
+      if(!inRun && s%4===0 && Math.random()<cfg.hold && beat<TOTAL_BEATS-2){
+        holdBeats = Math.random()<0.5?1:2;
+      }
+      add(beat, lane, holdBeats);
+      if(!inRun && holdBeats===0 && Math.random()<cfg.chord){
+        let l2=(lane+1+Math.floor(Math.random()*3))%4;
+        if(laneFreeAt[l2]===0) add(beat, l2, 0);
+      }
+    } else {
+      runLeft=0;   // 노트가 비면 스트림 끊기
+    }
+  }
+  chart.sort((a,b)=>a.t-b.t);
+}
 
 /* onset detection for uploaded audio */
 function detectOnsets(buffer){
@@ -937,7 +998,28 @@ function buildChartFromOnsets(onsets, dur, lv){
 
 /* ---------- music scheduler (synth songs) ---------- */
 let startTime=0, beatSched=0, srcNode=null;
-function scheduleMusic(now){ /* 내장 신스곡 제거 — 모든 곡이 MP3 재생이라 할 일 없음 */ }
+function scheduleMusic(now){
+  if(!curSong || curSong.isUpload) return;
+  const song=curSong;
+  const ahead = now - startTime + 0.4;
+  while(beatSched*0.5*SPB < ahead && beatSched < TOTAL_BEATS*2){
+    const half=beatSched, t=startTime + half*0.5*SPB, beat=half/2;
+    if(beat < TOTAL_BEATS){
+      if(Number.isInteger(beat)){
+        if(beat%2===0) kick(t);
+        if(beat%4===2) snare(t);
+        const mi=song.melody[beat % song.melody.length];
+        if(mi>=0){
+          tone(song.scale[mi], t, 0.22, 'triangle', 0.16);
+          // soft octave shimmer on later loops so long (repeated) melodies feel less monotonous
+          if(Math.floor(beat/song.melody.length)%2===1) tone(song.scale[mi]*2, t, 0.16, 'sine', 0.045);
+        }
+      }
+      hat(t, half%2?0.06:0.1);
+    }
+    beatSched++;
+  }
+}
 function startUploadPlayback(){
   if(!uploadBuffer) return;
   srcNode = ac.createBufferSource();
@@ -997,9 +1079,8 @@ function startGame(){
   initAudio();
   if(ac.state==='suspended') ac.resume();
   applyVolumes();
-  // 모든 곡은 MP3 온셋 분석 채보 사용(내장 신스곡 제거됨)
   if(curSong.isUpload) buildChartFromOnsets(curSong.onsets, uploadBuffer.duration, level);
-  else chart=[];
+  else buildChartSynth(curSong, level);
   loadMods(); applyMods();
   totalNotes=chart.length;
   if(!totalNotes){   // e.g. silent / unreadable upload yielded no beats
@@ -2466,7 +2547,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     function rqStepSpeed(dv){if(typeof settings==='undefined')return;settings.speed=Math.max(0.5,Math.min(2.5,Math.round((settings.speed+dv)*10)/10));try{saveSettings();syncSettingsUI();}catch(e){}var sv=document.getElementById('rQSpdV');if(sv)sv.textContent=settings.speed.toFixed(1)+'x';}
     var _rqd=document.getElementById('rQSpdDown'),_rqu=document.getElementById('rQSpdUp');if(_rqd)_rqd.onclick=function(){rqStepSpeed(-0.1);};if(_rqu)_rqu.onclick=function(){rqStepSpeed(0.1);};
     var _show=showScreen;
-    showScreen=function(id){if(typeof stopPreview==='function')stopPreview();_show(id);if(id==='songScreen'||id==='menuScreen'){fillHomeStats();}if(id==='resultScreen')renderResultQuick();rbRenderLevel();updateTab(id);statusEl.classList.toggle('on',!!LIGHT[id]);document.body.classList.toggle('rb-playing',id==='resultScreen');try{if(['menuScreen','songScreen','recordsScreen','settingsScreen'].indexOf(id)>=0)localStorage.setItem('rc_screen',id);}catch(e){}};
+    showScreen=function(id){if(typeof stopPreview==='function')stopPreview();_show(id);if(id==='songScreen'||id==='menuScreen'){fillHomeStats();}if(id==='resultScreen')renderResultQuick();rbRenderLevel();updateTab(id);statusEl.classList.toggle('on',!!LIGHT[id]);document.body.classList.toggle('rb-playing',id==='resultScreen');try{if(['menuScreen','songScreen','recordsScreen','statsScreen','settingsScreen'].indexOf(id)>=0)localStorage.setItem('rc_screen',id);}catch(e){}};
     refreshSongList=function(){buildSongList();};
     var _start=startGame;
     startGame=function(){pushRecent();tabbar.classList.add('hidden');statusEl.classList.remove('on');document.body.classList.add('rb-playing');return _start.apply(this,arguments);};
@@ -2489,8 +2570,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     var _tut=startTutorial;
     startTutorial=function(){tabbar.classList.add('hidden');statusEl.classList.remove('on');document.body.classList.add('rb-playing');return _tut.apply(this,arguments);};
     fillRecent();fillHomeStats();rbRenderLevel();updateTab('menuScreen');statusEl.classList.add('on');var _pm=document.getElementById('playMascot');if(_pm)_pm.innerHTML=CAT;
-    // 모바일은 화면이 좁아 가로모드에서 레이아웃이 깨지므로 가로모드 자체를 지원하지 않음(항상 세로 고정)
-    var orient=(function(){if(isMobile)return 'portrait';try{var v=localStorage.getItem('rc_orient');if(v)return v;return (window.innerWidth>=1024)?'landscape':'portrait';}catch(e){return 'portrait';}})();
+    var orient=(function(){try{var v=localStorage.getItem('rc_orient');if(v)return v;return (!isMobile&&window.innerWidth>=1024)?'landscape':'portrait';}catch(e){return 'portrait';}})();
     // 기기를 물리적으로 돌려도 자동 회전하지 않도록, 저장된 선택(기본 세로)으로 화면 방향을 잠근다.
     function lockOrient(o){try{if(window.screen&&screen.orientation&&screen.orientation.lock){var p=screen.orientation.lock(o==='landscape'?'landscape':'portrait');if(p&&p.catch)p.catch(function(){});}}catch(e){}}
     if(orient==='landscape')document.body.classList.add('rb-land');
@@ -2498,7 +2578,6 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
     var sr=document.querySelector('#settingsScreen .setrows');
     if(sr){var orow=document.createElement('div');orow.className='setrow';
       orow.innerHTML='<div class="top"><span>플레이 화면</span></div><div class="seg" id="rbOrient"><div class="lay'+(orient==='portrait'?' sel':'')+'" data-o="portrait">세로</div><div class="lay'+(orient==='landscape'?' sel':'')+'" data-o="landscape">가로</div></div><div class="legend">게임 플레이를 세로 또는 가로 화면으로 즐겨보세요.</div>';
-      if(isMobile)orow.style.display='none';   // 모바일: 가로모드 미지원 → 토글 숨김
       sr.appendChild(orow);
       orow.querySelector('#rbOrient').addEventListener('click',function(ev){var l=ev.target.closest('[data-o]');if(!l)return;orient=l.dataset.o;try{localStorage.setItem('rc_orient',orient);}catch(e){}orow.querySelectorAll('.lay').forEach(function(x){x.classList.toggle('sel',x===l);});document.body.classList.toggle('rb-land',orient==='landscape');lockOrient(orient);});
       var laneStyle=(function(){try{return localStorage.getItem('rc_lane')||'3d';}catch(e){return '3d';}})();
@@ -2621,36 +2700,4 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
       (function(){
         var box=document.querySelector('#settingsScreen .setrows'); if(!box) return;
         var byInput=function(id){var el=box.querySelector('#'+id);return el?el.closest('.setrow'):null;};
-        var groups=[
-          ['🔊 사운드',      [byInput('sMusic'), byInput('sSfx'), hrow]],
-          ['🎮 게임플레이',  [byInput('sSpeed'), byInput('sOffset'), byInput('sNofail'), mrow]],
-          ['🎨 화면 · 테마', [orow, lrow, arow, trow, skrow, cbrow]],
-          ['⌨️ 조작',        [byInput('sKeyboard'), krow]],
-          ['💾 데이터',      [bkrow, xrow]],
-          ['ℹ️ 정보 · 지원', [fbrow, irow]]
-        ];
-        groups.forEach(function(g){
-          var head=document.createElement('div'); head.className='setgroup'; head.textContent=g[0];
-          box.appendChild(head);
-          g[1].forEach(function(r){ if(r) box.appendChild(r); });   // appendChild가 기존 노드를 이동시켜 재배치
-        });
-      })();
-      }
-      try{var _ls=localStorage.getItem('rc_screen');if(_ls&&_ls!=='menuScreen'&&document.getElementById(_ls)){if(_ls==='songScreen')refreshSongList();else if(_ls==='recordsScreen')refreshRecords();showScreen(_ls);}}catch(e){}
-  }
-  if(document.readyState==='complete') boot(); else window.addEventListener('load',boot);
-})();
-</script>
-<style>
-/* ===== 모바일 플레이 전체화면 =====
-   아이폰(390×844) 프레임 크기에 고정돼 있어 안드로이드 등 다른 해상도에서
-   위아래·양옆에 여백과 둥근 코너가 보이던 문제 → 모바일에선 화면을 꽉 채움 */
-@media(max-width:767px){
-  body.rb-playing{align-items:stretch!important;justify-content:flex-start!important;}
-  body.rb-playing #stage{width:100vw!important;height:100dvh!important;max-width:none!important;
-    margin:0!important;border-radius:0!important;border:none!important;box-shadow:none!important;}
-}
-</style>
-
-</body>
-</html>
+  
