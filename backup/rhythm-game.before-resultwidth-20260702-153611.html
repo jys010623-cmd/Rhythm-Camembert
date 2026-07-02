@@ -85,8 +85,8 @@
   .stat .v{font-size:26px;font-weight:800;line-height:1.1;color:#fff;letter-spacing:-.01em;}
   #accWrap{text-align:right;}
   #pauseBtn{
-    position:absolute;top:16px;left:calc(50% - 24px);transform:translateX(-50%);
-    width:40px;height:40px;padding:0;border-radius:12px;
+    position:absolute;top:18px;left:50%;transform:translateX(-50%);
+    width:38px;height:38px;padding:0;border-radius:12px;
     font-size:0;line-height:0;
     background:rgba(255,255,255,.08);color:#EDE9FF;
     border:1px solid rgba(255,255,255,.16);box-shadow:none;display:none;
@@ -96,11 +96,11 @@
   #pauseBtn.show{display:flex;align-items:center;justify-content:center;gap:4px;}
   #pauseBtn:active{transform:translateX(-50%) scale(.94);}
   #tapMuteBtn{
-    position:absolute;top:16px;left:calc(50% + 4px);
-    width:40px;height:40px;padding:0;border-radius:12px;
-    font-size:18px;line-height:1;
-    background:rgba(255,255,255,.15);color:#EDE9FF;
-    border:1px solid rgba(255,255,255,.26);box-shadow:0 4px 14px rgba(0,0,0,.2);display:none;
+    position:absolute;top:18px;right:18px;
+    width:38px;height:38px;padding:0;border-radius:12px;
+    font-size:17px;line-height:1;
+    background:rgba(255,255,255,.08);color:#EDE9FF;
+    border:1px solid rgba(255,255,255,.16);box-shadow:none;display:none;
     z-index:7;align-items:center;justify-content:center;
     touch-action:manipulation;
   }
@@ -328,15 +328,15 @@
   #resultScreen{
     background:radial-gradient(120% 70% at 50% -10%, #2a1f5e 0%, var(--play-bg2) 42%, var(--play-bg) 100%);
     color:var(--play-ink);backdrop-filter:none;-webkit-backdrop-filter:none;
-    gap:6px;padding:16px 16px 18px;
+    gap:6px;padding:16px 22px 18px;
   }
   #resultScreen #rankLabel{font-size:13px;letter-spacing:.34em;font-weight:800;color:rgba(237,233,255,.6);}
   #resultScreen h2{color:#fff;}
-  .res{display:flex;flex-direction:column;gap:5px;font-size:15px;align-items:center;width:100%;}
+  .res{display:flex;flex-direction:column;gap:5px;font-size:15px;align-items:center;}
   .res .big{font-size:58px;font-weight:800;line-height:.92;letter-spacing:-.04em;
     background:var(--grad-rank);-webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 6px 20px rgba(167,139,250,.5));}
-  .rgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;width:min(440px,92%);margin-top:2px;}
+  .rgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 6px;width:min(300px,92%);margin-top:2px;}
   .rgrid .rrow{width:auto;}
   .rgrid .full{grid-column:1 / -1;}
   .res .big.fail{background:linear-gradient(135deg,#FB7185,#EC4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
@@ -498,10 +498,6 @@
         <input type="range" id="sSfx" min="0" max="100" step="5" value="70">
       </div>
       <div class="setrow">
-        <div class="top"><span>판정음 (맞췄을 때)</span><button class="toggle on" id="sJudge">ON</button></div>
-        <div class="legend">노트를 정확히 맞출 때 나는 등급별 소리(퍼펙트/그레이트/굿). 탭음과 별개예요.</div>
-      </div>
-      <div class="setrow">
         <div class="top"><span>노 페일 (연습 모드)</span><button class="toggle off" id="sNofail">OFF</button></div>
         <div class="legend">체력이 0이 되어도 끝까지 플레이합니다.</div>
       </div>
@@ -641,7 +637,7 @@ function updatePadLabels(){
 }
 
 /* ---------- settings + persistence ---------- */
-const DEFAULTS = {speed:1.0, offset:0, music:80, sfx:70, nofail:false, layout:'dfjk', keyboard:!isMobile, hitsfx:'soft', tapMute:false, missSfx:true, vibrate:true, judgeSfx:true};
+const DEFAULTS = {speed:1.0, offset:0, music:80, sfx:70, nofail:false, layout:'dfjk', keyboard:!isMobile, hitsfx:'soft', tapMute:false, missSfx:true, vibrate:true};
 let settings = Object.assign({}, DEFAULTS);
 function loadSettings(){
   try{ const s=JSON.parse(localStorage.getItem('rc_settings')); if(s) settings=Object.assign({}, DEFAULTS, s); }catch(e){}
@@ -703,7 +699,7 @@ function hat(t,vol=0.1){
   s.connect(hp);hp.connect(g);g.connect(musicGain); s.start(t); s.stop(t+0.06);
 }
 function hitSound(tier){
-  if(!ac || settings.sfx<=0 || settings.judgeSfx===false) return;
+  if(!ac || settings.sfx<=0 || settings.hitsfx==='off') return;
   const t=ac.currentTime;
   const f = tier==='PERFECT'?990 : tier==='GREAT'?820 : 660;
   tone(f, t, 0.08, 'sine', tier==='PERFECT'?0.2:0.14, sfxGain);
@@ -1023,7 +1019,7 @@ function applyMods(){
 function scoreMult(){ return feverActive?2:1; }
 function addFever(tier){ if(feverActive) return; const g=tier==='PERFECT'?7:tier==='GREAT'?4:tier==='GOOD'?1.5:0; fever=Math.min(FEVER_MAX,fever+g); if(fever>=FEVER_MAX) activateFever(); updateFever(); }
 function loseFever(){ if(!feverActive){ fever=Math.max(0,fever-14); updateFever(); } }
-function activateFever(){ feverActive=true; feverEndAt=songTime()+FEVER_DUR; document.body.classList.add('fever-on'); showJudge('FEVER!',null); if(ac&&settings.sfx>0){ const t=ac.currentTime;[523,659,784,1046].forEach((fr,i)=>tone(fr,t+i*0.06,0.18,'sawtooth',0.1,sfxGain)); } for(let l=0;l<4;l++) spawnFx(l,'PERFECT'); buzz([30,50,30,50]); }
+function activateFever(){ feverActive=true; feverEndAt=songTime()+FEVER_DUR; document.body.classList.add('fever-on'); showJudge('FEVER!',null); if(ac&&settings.sfx>0){ const t=ac.currentTime;[523,659,784,1046].forEach((fr,i)=>tone(fr,t+i*0.06,0.18,'sawtooth',0.1,sfxGain)); } for(let l=0;l<4;l++) spawnFx(l,'PERFECT'); buzz([20,40,20,40]); }
 function updateFever(){ const fb=$('#feverBar'); if(fb){ let w=fever; if(feverActive) w=Math.max(0,Math.min(100,((feverEndAt-songTime())/FEVER_DUR)*100)); fb.style.width=Math.max(0,Math.min(100,w))+'%'; } const fw=$('#feverWrap'); if(fw) fw.classList.toggle('active',feverActive); }
 let lastBeatPulse=-1;
 const down=[false,false,false,false];
@@ -1105,7 +1101,7 @@ function loop(){
     const c=Math.ceil(-sT);
     $('#countdown').classList.add('show');
     $('#countdown').textContent = c>0 ? c : 'GO';
-    if(c!==cdLast){ cdLast=c; if(ac&&settings.sfx>0){ const ct=ac.currentTime; if(c>0){ tone(760,ct,0.09,'square',0.16,sfxGain); } else { tone(1280,ct,0.13,'square',0.2,sfxGain); } } buzz(c>0?22:[26,36,26]); }
+    if(c!==cdLast){ cdLast=c; if(ac&&settings.sfx>0){ const ct=ac.currentTime; if(c>0){ tone(760,ct,0.09,'square',0.16,sfxGain); } else { tone(1280,ct,0.13,'square',0.2,sfxGain); } } buzz(c>0?10:[14,18,14]); }
   } else if($('#countdown').classList.contains('show') && sT>0.25){
     $('#countdown').classList.remove('show');
   }
@@ -1227,7 +1223,7 @@ function releaseLane(lane){
         n.holding=false; n.broken=true; n.tailDone=true;
         combo=0; counts.MISS++; life=Math.max(0,life-LIFE_BREAK);
         $('#combo').style.opacity=0; updateComboHeat(); updateLife(); loseFever();
-        showJudge('MISS',null); missSound(); removeEl(n); shakeField(); buzz(55);
+        showJudge('MISS',null); missSound(); removeEl(n); shakeField(); buzz(35);
         if(MODS.sudden){ fail(); return; }
         if(life<=0 && !settings.nofail) fail();
       }
@@ -1246,7 +1242,7 @@ function completeHold(n){
   $('#score').textContent=score;
   showJudge('PERFECT',null); showCombo();
   spawnFx(n.lane,'PERFECT'); updateLife(); addFever('PERFECT');
-  flashHit(); buzz(24);
+  flashHit(); buzz(14);
   if(combo>0 && combo%50===0) comboMilestone();
 }
 function applyJudge(tier, lane, early){
@@ -1257,7 +1253,7 @@ function applyJudge(tier, lane, early){
   $('#score').textContent=score;
   showJudge(tier, tier==='PERFECT'?null:early);
   showCombo(); hitSound(tier); spawnFx(lane,tier); updateLife(); addFever(tier);
-  flashHit(); buzz(tier==='PERFECT'?16:tier==='GREAT'?22:28);
+  flashHit(); buzz(tier==='PERFECT'?8:tier==='GREAT'?13:18);
   if(combo>0 && combo%50===0) comboMilestone();
 }
 function registerMiss(lane){
@@ -1265,7 +1261,7 @@ function registerMiss(lane){
   life=Math.max(0,life-LIFE_MISS);
   showJudge('MISS',null); missSound();
   $('#combo').style.opacity=0; updateComboHeat();
-  updateLife(); loseFever(); shakeField(); buzz(55);
+  updateLife(); loseFever(); shakeField(); buzz(35);
   if(MODS.sudden){ fail(); return; }
   if(life<=0 && !settings.nofail) fail();
 }
@@ -1350,7 +1346,7 @@ function comboMilestone(){
   pulseStage();
   for(let l=0;l<4;l++) spawnFx(l,'PERFECT');
   if(ac && settings.sfx>0){ const t=ac.currentTime; [660,880,1100].forEach((fq,i)=>tone(fq,t+i*0.05,0.14,'sine',0.13,sfxGain)); }
-  buzz([24,34,24]);
+  buzz([12,18,12]);
   const c=$('#combo'); c.classList.add('milestone'); setTimeout(()=>c.classList.remove('milestone'),450);
 }
 function drawHist(){
@@ -1716,7 +1712,6 @@ function syncSettingsUI(){
   const nf=$('#sNofail'); nf.textContent=settings.nofail?'ON':'OFF';
   nf.classList.toggle('on',settings.nofail); nf.classList.toggle('off',!settings.nofail);
   const vb=$('#sVibrate'); if(vb){ const on=settings.vibrate!==false; vb.textContent=on?'ON':'OFF'; vb.classList.toggle('on',on); vb.classList.toggle('off',!on); }
-  const jd=$('#sJudge'); if(jd){ const on=settings.judgeSfx!==false; jd.textContent=on?'ON':'OFF'; jd.classList.toggle('on',on); jd.classList.toggle('off',!on); }
   const kb=$('#sKeyboard'); kb.textContent=settings.keyboard?'ON':'OFF';
   kb.classList.toggle('on',settings.keyboard); kb.classList.toggle('off',!settings.keyboard);
   $('#layoutRow').style.display=settings.keyboard?'flex':'none';
@@ -1727,8 +1722,7 @@ $('#sOffset').addEventListener('input',e=>{ settings.offset=parseInt(e.target.va
 $('#sMusic').addEventListener('input',e=>{ settings.music=parseInt(e.target.value,10); $('#vMusic').textContent=settings.music; applyVolumes(); saveSettings(); });
 $('#sSfx').addEventListener('input',e=>{ settings.sfx=parseInt(e.target.value,10); $('#vSfx').textContent=settings.sfx; applyVolumes(); saveSettings(); });
 $('#sNofail').addEventListener('click',()=>{ settings.nofail=!settings.nofail; syncSettingsUI(); saveSettings(); });
-$('#sVibrate').addEventListener('click',()=>{ settings.vibrate=(settings.vibrate===false); syncSettingsUI(); saveSettings(); if(settings.vibrate&&navigator.vibrate){try{navigator.vibrate([30,40,30]);}catch(e){}} });
-$('#sJudge').addEventListener('click',()=>{ settings.judgeSfx=(settings.judgeSfx===false); syncSettingsUI(); saveSettings(); if(settings.judgeSfx){ try{ initAudio(); if(ac&&ac.state==='suspended')ac.resume(); hitSound('PERFECT'); }catch(e){} } });
+$('#sVibrate').addEventListener('click',()=>{ settings.vibrate=(settings.vibrate===false); syncSettingsUI(); saveSettings(); if(settings.vibrate&&navigator.vibrate){try{navigator.vibrate(18);}catch(e){}} });
 $('#sKeyboard').addEventListener('click',()=>{ settings.keyboard=!settings.keyboard; updatePadLabels(); syncSettingsUI(); saveSettings(); });
 
 /* ============================================================
@@ -2258,10 +2252,7 @@ body.cx4 #hitline{box-shadow:0 0 36px rgba(251,191,36,.95),0 0 70px rgba(251,191
 body.rb-cb #judge{-webkit-text-stroke:1px rgba(0,0,0,.55);text-shadow:0 2px 7px rgba(0,0,0,.55);}
 body.rb-cb #judgeSub{font-weight:800;-webkit-text-stroke:.5px rgba(0,0,0,.4);}
 /* ---- result quick controls ---- */
-#rQuick{margin:6px auto 2px;width:min(440px,92%);display:flex;flex-direction:column;gap:6px;}
-#resultScreen .btnrow{width:min(440px,92%);margin:4px auto 0;gap:10px;flex-wrap:nowrap;}
-#resultScreen #againBtn{flex:1;}
-#resultScreen #menuBtn{flex:none;white-space:nowrap;}
+#rQuick{margin:6px auto 2px;width:min(320px,86%);display:flex;flex-direction:column;gap:6px;}
 .rq-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;color:rgba(237,233,255,.85);}
 .rq-diff{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
 .rq-diff .rqd{width:28px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:rgba(255,255,255,.09);color:rgba(237,233,255,.7);cursor:pointer;border:1px solid transparent;}
@@ -2282,9 +2273,9 @@ body.fever-on #stage{animation:feverPulse .5s ease-in-out infinite;}
 body.fever-on .note{filter:brightness(1.35) saturate(1.5);}
 body.fever-on #hitline{box-shadow:0 0 26px rgba(251,191,36,.95)!important;}
 /* ---- result histogram ---- */
-#rHistWrap{margin:4px auto 0;width:min(440px,92%);text-align:center;}
+#rHistWrap{margin:4px auto 0;width:min(240px,88%);text-align:center;}
 #rHistWrap .rhtitle{font-size:11px;font-weight:700;color:rgba(237,233,255,.7);margin-bottom:5px;}
-#rHist{width:100%;max-width:100%;height:56px;background:rgba(0,0,0,.18);border-radius:10px;}
+#rHist{width:220px;max-width:100%;height:54px;background:rgba(0,0,0,.18);border-radius:10px;}
 /* ---- modifiers ---- */
 .rb-mods{display:flex;flex-wrap:wrap;gap:7px;}
 .rb-mod{padding:7px 12px;border-radius:11px;font-size:12.5px;font-weight:800;background:rgba(139,92,246,.1);color:#7a7390;cursor:pointer;border:1.5px solid transparent;user-select:none;}
@@ -2411,7 +2402,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
 #splash .sp-logo{position:relative;width:120px;height:120px;margin:0 auto 24px;}
 #splash .sp-logo svg{width:100%;height:100%;filter:drop-shadow(0 8px 22px rgba(139,92,246,.4));animation:spBob 2.4s ease-in-out infinite;}
 @keyframes spBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-#splash .sp-ring{display:none;}
+#splash .sp-ring{position:absolute;inset:-16px;border-radius:50%;background:conic-gradient(from 0deg,#22D3EE,#A78BFA,#F472B6,#FBBF24,#22D3EE);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));animation:spSpin 3s linear infinite;filter:drop-shadow(0 0 8px rgba(167,139,250,.5));}
 @keyframes spSpin{to{transform:rotate(360deg)}}
 #splash h1.sp-title{font-size:clamp(42px,9vmin,68px);margin:0;font-weight:900;letter-spacing:-.02em;background:linear-gradient(100deg,#8B5CF6,#EC4899,#3B82F6,#8B5CF6);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 14px rgba(139,92,246,.28));animation:spHue 4s linear infinite;}
 @keyframes spHue{to{background-position:300% 0}}
@@ -2618,7 +2609,7 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
       if(typeof settings!=='undefined'&&!settings.hitsfx){settings.hitsfx='soft';}
       var hsfx=(typeof settings!=='undefined'&&settings.hitsfx)||'soft';
       var hrow=document.createElement('div');hrow.className='setrow';
-      hrow.innerHTML='<div class="top"><span>탭 효과음 (노트 누를 때)</span></div><div class="seg" id="rbHsfx">'+SFXOPT.map(function(o){return '<div class="lay'+(hsfx===o[0]?' sel':'')+'" data-h="'+o[0]+'">'+o[1]+'</div>';}).join('')+'</div><div class="legend">노트를 누를 때 나는 소리예요. 누르면 미리 들려줍니다.</div>';
+      hrow.innerHTML='<div class="top"><span>타격 효과음</span></div><div class="seg" id="rbHsfx">'+SFXOPT.map(function(o){return '<div class="lay'+(hsfx===o[0]?' sel':'')+'" data-h="'+o[0]+'">'+o[1]+'</div>';}).join('')+'</div><div class="legend">노트를 누를 때 나는 소리예요. 누르면 미리 들려줍니다.</div>';
       sr.appendChild(hrow);
       hrow.querySelector('#rbHsfx').addEventListener('click',function(e){var l=e.target.closest('[data-h]');if(!l)return;settings.hitsfx=l.dataset.h;try{saveSettings();}catch(x){}hrow.querySelectorAll('.lay').forEach(function(x){x.classList.toggle('sel',x===l);});try{initAudio();if(ac&&ac.state==='suspended')ac.resume();clickSound();}catch(x){}});
       // 모디파이어 (플레이 옵션)
@@ -2707,60 +2698,4 @@ body.skin-mono .note{background:linear-gradient(135deg,#E5E7EB,#9CA3AF)!importan
         howto:{t:'이용 방법',h:'<h3>기본</h3><p>4개 레인으로 노트가 판정선까지 내려옵니다. 노트가 <b>선에 닿는 순간</b> 그 레인을 터치하세요. 아래 패드뿐 아니라 레인 어디를 눌러도 됩니다.</p><h3>판정</h3><p><b>PERFECT · GREAT · GOOD</b> 순으로 정확할수록 점수가 높고, 놓치면 <b>MISS</b>예요. 정확도에 따라 최종 등급 <b>SS·S·A·B·C·D</b>가 매겨집니다.</p><h3>롱노트</h3><p>긴 노트는 선에 닿는 순간부터 <b>끝까지 누르고</b> 있어야 합니다. 흐르는 줄무늬가 있는 노트예요.</p><h3>콤보 · 피버</h3><p>콤보가 이어질수록 화면이 점점 뜨거워지고(12·30·60·100), FEVER 게이지가 차면 잠시 점수가 배로 들어옵니다.</p><h3>조작</h3><ul><li>모바일: 화면 터치(멀티터치 지원)</li><li>PC: 기본 <b>D · F · J · K</b> (설정에서 변경)</li><li>일시정지: 상단 버튼 또는 Esc</li></ul>'},
         notice:{t:'공지사항',h:'<h3>v1.0 · 오픈 베타</h3><p>리듬베르는 현재 <b>오픈 베타(얼리 액세스)</b> 단계예요. 기능이 계속 추가·개선되며 밸런스나 UI가 바뀔 수 있습니다.</p><h3>최근 업데이트</h3><ul><li>레인 전체 터치 입력 · 멀티터치</li><li>판정 창 표준화(기본 난이도 NORMAL)</li><li>롱노트 가시성 개선</li><li>지그재그 · 계단 패턴 추가</li><li>콤보 고조 연출 + 가속 효과음</li><li>곡 카드 등급 메달(SS~D)</li></ul><p class="muted">기록은 기기에 저장돼요. 설정 &gt; 기록 백업으로 안전하게 보관하세요.</p>'},
         terms:{t:'이용약관',h:'<p>본 약관은 개인이 취미로 만든 무료 리듬 게임 <b>리듬베르</b>(오픈 베타)의 이용에 적용됩니다.</p><h3>1. 서비스</h3><p>회원가입 없이 누구나 무료로 이용할 수 있어요. 오픈 베타 단계라 기능·수록곡·밸런스가 사전 고지 없이 변경·중단될 수 있습니다.</p><h3>2. 이용자 콘텐츠</h3><p>이용자가 추가한 음악 파일은 <b>이용자 본인의 브라우저에서만</b> 처리되며 서버로 전송되지 않습니다. 해당 파일의 저작권 준수 책임은 이용자에게 있어요.</p><h3>3. 수록곡 · 저작물</h3><p>게임 기본 수록곡은 제작자가 직접 생성한 곡입니다. 게임 내 감상 목적 외 무단 복제·재배포를 금합니다. (자세한 내용은 “노래 저작권” 참고)</p><h3>4. 책임의 한계</h3><p>본 게임은 “있는 그대로” 제공됩니다. 제작자는 오류·중단·데이터 손실 등에 대해 관련 법이 허용하는 범위에서 책임을 지지 않습니다.</p><h3>5. 문의</h3><p>설정의 건의함 또는 GitHub 저장소로 의견을 남겨주세요.</p><p class="muted">본 약관은 예시 문구를 바탕으로 작성되었습니다.</p>'},
-        privacy:{t:'개인정보처리방침',h:'<p><b>리듬베르는 어떤 개인정보도 서버로 수집·전송하지 않습니다.</b></p><h3>저장되는 정보</h3><ul><li>게임 기록·설정·즐겨찾기 → 이용자 기기의 브라우저 저장소(localStorage)에만 저장</li><li>추가한 음악 파일 → 업로드 없이 브라우저 안에서만 재생</li></ul><h3>사용하지 않는 것</h3><p>쿠키 기반 추적, 광고, 분석 도구를 사용하지 않습니다.</p><h3>데이터 관리</h3><p>브라우저 데이터를 삭제하면 저장된 기록도 함께 사라집니다. 설정 &gt; 기록 백업에서 파일로 내보내거나 복원할 수 있어요.</p><h3>호스팅</h3><p>본 게임은 GitHub Pages로 제공되며, 접속 시 표준 서버 접속 로그(예: IP 주소)가 GitHub 측에 남을 수 있습니다.</p>'},
-        music:{t:'노래 저작권',h:'<p>게임에 기본 수록된 곡은 제작자가 <b>Suno Pro</b>로 직접 생성한 음악입니다.</p><h3>권리 · 이용</h3><p>Suno의 Pro 플랜 정책상, 구독 상태에서 만든 곡의 <b>상업적 이용 권리는 제작자에게</b> 있습니다. 게임 내 감상 목적 외 <b>무단 복제·재배포·재업로드</b>는 삼가 주세요.</p><h3>오픈 베타 안내</h3><p>현재 <b>오픈 베타</b> 단계라 수록곡은 <b>추가·교체·삭제 등 변동될 수 있어요.</b> 이 과정에서 특정 곡의 기록이 사라질 수 있는 점 양해 부탁드립니다.</p><h3>참고</h3><p class="muted">AI로 생성된 음원은 국가·상황에 따라 저작권 보호 범위가 다를 수 있습니다.</p>'},
-        font:{t:'폰트 저작권',h:'<p>리듬베르에 사용된 글꼴과 라이선스입니다.</p><h3>Paperlogy (페이퍼로지)</h3><p>본문·UI 기본 글꼴. <b>SIL 오픈 폰트 라이선스(OFL)</b> — 개인·상업용 모두 무료이며, 글꼴 파일 자체의 판매만 금지됩니다. 제작: 핏쿤(이주임) · 페이퍼로지(김도균).</p><h3>Pretendard (프리텐다드)</h3><p>보조 글꼴. <b>SIL Open Font License 1.1</b> — 개인·상업용 무료(글꼴 자체 판매만 금지). 저작권: 길형진(orioncactus).</p><h3>CLOUD SOFA (구름소파 · 로고)</h3><p>“리듬베르” 로고에 쓰인 손글씨 글꼴. 제작: <b>남김</b>. 개인·상업용 무료이며 <b>웹 임베딩·로고(BI/CI) 사용이 허용</b>됩니다. 폰트 파일의 무단 재배포는 금지돼요. (출처: 눈누)</p><p class="muted">모든 글꼴은 각 라이선스 허용 범위 안에서 사용되었습니다.</p>'}
-      };
-      var infoModal=document.getElementById('rbInfoModal');
-      if(!infoModal){infoModal=document.createElement('div');infoModal.id='rbInfoModal';infoModal.className='overlay hidden';stage.appendChild(infoModal);}
-      function rbOpenInfo(key){var d=INFO[key];if(!d)return;infoModal.innerHTML='<div class="rb-sshead" style="margin-bottom:6px"><button class="rb-iconbtn" id="rbInfoBack">'+I.back+'</button><h2 style="margin-left:8px">'+d.t+'</h2></div><div class="rb-infobody">'+d.h+'</div>';infoModal.classList.remove('hidden');var bk=infoModal.querySelector('#rbInfoBack');if(bk)bk.onclick=function(){infoModal.classList.add('hidden');};}
-      var irow=document.createElement('div');irow.className='setrow';
-      irow.innerHTML='<div class="top"><span>앱 정보 · 약관</span></div><div class="rb-infolist">'+[['howto','이용 방법'],['notice','공지사항'],['terms','이용약관'],['privacy','개인정보처리방침'],['music','노래 저작권'],['font','폰트 저작권']].map(function(o){return '<button class="rb-infoitem" data-i="'+o[0]+'">'+o[1]+'</button>';}).join('')+'</div><div class="rb-ver">리듬베르 <b>v1.0</b> · 오픈 베타</div>';
-      sr.appendChild(irow);
-      irow.querySelector('.rb-infolist').addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(b)rbOpenInfo(b.dataset.i);});
-      function rbState(){var el=krow.querySelector('#rbCustomState');if(el){el.textContent=useCustom?'사용 중':'미사용';}}
-      function renderCaps(){var c=krow.querySelector('#rbKeyCap');if(!c)return;c.innerHTML='';for(var i=0;i<4;i++){(function(i){var b=document.createElement('div');b.className='lay';b.style.cssText='flex:1;text-align:center;line-height:1.25;cursor:pointer;';b.innerHTML='<div style="font-size:9px;color:#9A93AE;font-weight:700">레인 '+(i+1)+'</div><div class="kk" style="font-size:16px;font-weight:800">'+kdisp(customKeys[i])+'</div>';b.onclick=function(){capKey(i,b);};c.appendChild(b);})(i);}}
-      function capKey(idx,b){b.querySelector('.kk').textContent='?';b.classList.add('sel');var h=function(ev){if(ev.code==='Escape'){window.removeEventListener('keydown',h,true);renderCaps();return;}ev.preventDefault();ev.stopPropagation();customKeys[idx]=ev.code;try{localStorage.setItem('rc_customkeys',JSON.stringify(customKeys));}catch(e){}useCustom=true;try{localStorage.setItem('rc_usecustom','1');}catch(e){}applyCustom();window.removeEventListener('keydown',h,true);renderCaps();rbState();};window.addEventListener('keydown',h,true);}
-      renderCaps();rbState();
-      var lrEl=document.getElementById('layoutRow');if(lrEl){lrEl.addEventListener('click',function(ev){if(ev.target.closest('.lay')){useCustom=false;try{localStorage.setItem('rc_usecustom','0');}catch(e){}rbState();}});}
-      // ── 설정 섹션별 정리(재배치) ──
-      (function(){
-        var box=document.querySelector('#settingsScreen .setrows'); if(!box) return;
-        var byInput=function(id){var el=box.querySelector('#'+id);return el?el.closest('.setrow'):null;};
-        var groups=[
-          ['🔊 사운드',      [byInput('sMusic'), byInput('sSfx'), hrow, byInput('sJudge')]],
-          ['🎮 게임플레이',  [byInput('sSpeed'), byInput('sOffset'), byInput('sNofail'), byInput('sVibrate'), mrow]],
-          ['🎨 화면 · 테마', [orow, lrow, arow, trow, skrow, cbrow]],
-          ['⌨️ 조작',        isMobile?[]:[byInput('sKeyboard'), krow]],
-          ['💾 데이터',      [bkrow, xrow]],
-          ['ℹ️ 정보 · 지원', [fbrow, irow]]
-        ];
-        // 모바일: 물리 키보드가 없으므로 키보드 토글·키 직접 지정 UI 숨김
-        if(isMobile){ [byInput('sKeyboard'), krow].forEach(function(r){ if(r) r.style.display='none'; }); }
-        groups.forEach(function(g){
-          var rows=g[1].filter(function(r){return r;});
-          if(!rows.length) return;   // 빈 그룹(예: 모바일 조작)은 헤더도 만들지 않음
-          var head=document.createElement('div'); head.className='setgroup'; head.textContent=g[0];
-          box.appendChild(head);
-          rows.forEach(function(r){ box.appendChild(r); });   // appendChild가 기존 노드를 이동시켜 재배치
-        });
-      })();
-      }
-      try{var _ls=localStorage.getItem('rc_screen');if(_ls&&_ls!=='menuScreen'&&document.getElementById(_ls)){if(_ls==='songScreen')refreshSongList();else if(_ls==='recordsScreen')refreshRecords();showScreen(_ls);}}catch(e){}
-  }
-  if(document.readyState==='complete') boot(); else window.addEventListener('load',boot);
-})();
-</script>
-<style>
-/* ===== 모바일 플레이 전체화면 =====
-   아이폰(390×844) 프레임 크기에 고정돼 있어 안드로이드 등 다른 해상도에서
-   위아래·양옆에 여백과 둥근 코너가 보이던 문제 → 모바일에선 화면을 꽉 채움 */
-@media(max-width:767px){
-  body.rb-playing{align-items:stretch!important;justify-content:flex-start!important;}
-  body.rb-playing #stage{width:100vw!important;height:100dvh!important;max-width:none!important;
-    margin:0!important;border-radius:0!important;border:none!important;box-shadow:none!important;}
-}
-</style>
-
-</body>
-</html>
+        privacy:{t:'개인정보처리방침',h:'<p><b>리듬베르는 어떤 개인정보도 서버로 수집·전송하지 않습니다.</b></p><h3>저장되는 정보</h3><ul><li>게임 기록·설정·즐겨찾기 → 이용자 기기의 브라우저 저장소(localStorage)에만 저장</li><li>추가한 음악 파일 → 업로드 없이 브라우저 안에서만 재생</li></ul><h3>사용하지 않는 것</h3><p>쿠키 기�
