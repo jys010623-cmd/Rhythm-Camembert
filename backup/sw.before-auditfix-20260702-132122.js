@@ -1,20 +1,12 @@
 /* 리듬베르 service worker — offline + fast repeat loads
    음악(music/)은 캐시 우선(큰 파일·잘 안 바뀜), 나머지는 네트워크 우선(항상 최신).
    게임을 크게 업데이트하면 아래 CACHE 버전을 올려 강제 갱신하세요. */
-const CACHE = 'rc-v6';
-const CORE = ['./rhythm-game.html', './manifest.json', './icon.svg',
-  './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
-// 내장곡 — 설치 시 베스트에포트로 미리 캐시(하나 실패해도 설치·나머지는 진행)
-const SONGS = ['까망베르.mp3', '까망베르 게임중.mp3', '까망베르의 등교.mp3', '구름.mp3', '구름 (1).mp3']
-  .map((f) => './music/' + encodeURIComponent(f));
+const CACHE = 'rc-v5';
+const CORE = ['./rhythm-game.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE)
-      .then((c) => c.addAll(CORE).catch(() => {})
-        .then(() => Promise.allSettled(SONGS.map((u) => c.add(u)))))
-      .catch(() => {})
-      .then(() => self.skipWaiting())
+    caches.open(CACHE).then((c) => c.addAll(CORE)).catch(() => {}).then(() => self.skipWaiting())
   );
 });
 
