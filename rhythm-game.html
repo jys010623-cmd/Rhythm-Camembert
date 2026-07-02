@@ -473,7 +473,7 @@
     <div class="setrows">
       <div class="setrow">
         <div class="top"><span>노트 속도</span><span class="val" id="vSpeed">1.0x</span></div>
-        <input type="range" id="sSpeed" min="0.5" max="2.5" step="0.1" value="1">
+        <input type="range" id="sSpeed" min="0.5" max="2.0" step="0.1" value="1">
       </div>
       <div class="setrow">
         <div class="top"><span>싱크 보정 (오프셋)</span><span class="val" id="vOffset">0 ms</span></div>
@@ -627,6 +627,8 @@ const DEFAULTS = {speed:1.0, offset:0, music:80, sfx:70, nofail:false, layout:'d
 let settings = Object.assign({}, DEFAULTS);
 function loadSettings(){
   try{ const s=JSON.parse(localStorage.getItem('rc_settings')); if(s) settings=Object.assign({}, DEFAULTS, s); }catch(e){}
+  // 1회성 속도 재기준화: 구 1.0 기준 -> 신 1.0(=구 1.5x). 저장된 값 유지 위해 1.5로 나눔
+  try{ if(!localStorage.getItem('rc_speedrebase')){ if(settings.speed) settings.speed=Math.max(0.5,Math.min(2.0, Math.round((settings.speed/1.5)*10)/10)); localStorage.setItem('rc_speedrebase','1'); saveSettings(); } }catch(e){}
 }
 function saveSettings(){ try{ localStorage.setItem('rc_settings', JSON.stringify(settings)); }catch(e){} }
 function bestKey(songId,lv){ return 'rc_best_'+songId+'_'+lv; }
@@ -872,7 +874,7 @@ function quantizeOnsets(onsets, period){
 function buildChartFromOnsets(onsets, dur, lv){
   chart=[];
   const cfg=DIFFS[lv];
-  approach = cfg.approach / settings.speed;
+  approach = cfg.approach / (settings.speed * 1.5); // 1.0 = 평균 기준(구 1.5x)
   songLen = dur;
   SPB=0; TOTAL_BEATS=0;   // uploads: no synth beat-pulse
   // estimate tempo and snap onsets to the beat grid so notes line up with the music

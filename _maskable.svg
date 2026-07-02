@@ -13,8 +13,8 @@
       <stop offset="1" stop-color="#7C3AED"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <g transform="translate(56 66) scale(2)">
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g transform="translate(56 34) scale(2)">
     <ellipse cx="100" cy="150" rx="47" ry="39" fill="url(#cb)"/>
     <path d="M65 70 L60 35 L93 60 Z" fill="url(#cb)"/>
     <path d="M135 70 L140 35 L107 60 Z" fill="url(#cb)"/>
